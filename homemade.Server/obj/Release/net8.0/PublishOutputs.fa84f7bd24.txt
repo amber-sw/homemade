@@ -1,0 +1,12 @@
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\homemade.Server.exe
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\appsettings.Development.json
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\appsettings.json
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\homemade.Server.dll
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\homemade.Server.deps.json
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\homemade.Server.runtimeconfig.json
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\homemade.Server.pdb
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\Microsoft.AspNetCore.SpaProxy.dll
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\Microsoft.OpenApi.dll
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\Swashbuckle.AspNetCore.Swagger.dll
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Code\homemade\homemade.Server\obj\Release\net8.0\PubTmp\Out\Swashbuckle.AspNetCore.SwaggerUI.dll

@@ -1,0 +1,10 @@
+{
+"SpaProxyServer": {
+"ServerUrl": "https://localhost:52239",
+"RedirectUrl": "",
+"LaunchCommand": "npm run dev",
+"WorkingDirectory": "C:\\Code\\homemade\\homemade.Server\\..\\homemade.client",
+"MaxTimeoutInSeconds": "120",
+"KeepRunning": "false"
+}
+}
