@@ -1,7 +1,7 @@
 <template>
     <div class="weather-component">
         <h1>Weather forecast</h1>
-        <p>This component demonstrates fetching data from the server.</p>
+        <p>This component demonstrates fetching data from the server......</p>
 
         <div v-if="loading" class="loading">
             Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationvue">https://aka.ms/jspsintegrationvue</a> for more details.
@@ -11,7 +11,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Date</th>
+                        <th>Date test</th>
                         <th>Temp. (C)</th>
                         <th>Temp. (F)</th>
                         <th>Summary</th>

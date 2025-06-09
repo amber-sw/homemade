@@ -8,5 +8,7 @@ namespace homemade.Server.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder.UseSqlite("DataSource=homemadeDB; Cache=Shared");
         public DbSet<Recipe> Recipes { get; set; }
+        public DbSet<Ingredient> Ingredients { get; set; }
+        public DbSet<IngredientRecipe> IngredientsRecipes { get; set; }
     }
 }
