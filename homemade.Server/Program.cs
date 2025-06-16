@@ -27,6 +27,13 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/recipes", (RecipeContext db) =>
 {
     var recipes = db.Recipes;
+    var ingredients = db.Ingredients;
+    var ingredientRecipes = db.IngredientsRecipes;
+
+    foreach (var recipe in recipes)
+    {
+        var ingredientRecipesFiltered = ingredientRecipes.Where(ir => ir.Recipe.Id == recipe.Id);
+    }
 
     return Results.Ok(recipes);
 });

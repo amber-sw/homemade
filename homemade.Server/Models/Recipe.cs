@@ -6,6 +6,8 @@
         public string Name { get; set; }
         public string Description { get; set; } 
         public required List<string> Instructions { get; set; }
+        public List<IngredientRecipe> IngredientRecipes { get; } = [];
+        public List<Ingredient> Ingredients { get; } = [];
 
     }
 }

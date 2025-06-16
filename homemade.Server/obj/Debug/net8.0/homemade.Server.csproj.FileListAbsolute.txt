@@ -179,3 +179,4 @@ C:\Code\homemade\homemade.Server\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis
 C:\Code\homemade\homemade.Server\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 C:\Code\homemade\homemade.Server\bin\Debug\net8.0\package-lock.json
 C:\Code\homemade\homemade.Server\bin\Debug\net8.0\package.json
+C:\Code\homemade\homemade.Server\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
