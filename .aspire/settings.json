@@ -1,0 +1,6 @@
+{
+  "appHostPath": "../src/Homemade.AppHost/Homemade.AppHost.csproj",
+  "features": {
+    "deployCommandEnabled": "true"
+  }
+}
