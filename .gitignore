@@ -482,3 +482,10 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Generated files
+src/Homemade.Web/wwwroot/app.css
+.tailwind/
+
+# Local configuration
+.claude/settings.local.json

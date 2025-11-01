@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+    /* Primary - Warm Orange (for food/cooking) */
+    --color-primary-50: oklch(0.97 0.01 50);
+    --color-primary-100: oklch(0.94 0.04 50);
+    --color-primary-200: oklch(0.88 0.09 50);
+    --color-primary-300: oklch(0.81 0.14 45);
+    --color-primary-400: oklch(0.73 0.18 40);
+    --color-primary-500: oklch(0.68 0.19 35);
+    --color-primary-600: oklch(0.61 0.18 32);
+    --color-primary-700: oklch(0.51 0.14 30);
+    --color-primary-800: oklch(0.43 0.11 28);
+    --color-primary-900: oklch(0.36 0.09 27);
+    --color-primary-950: oklch(0.24 0.06 25);
+
+    /* Secondary - Soft Cream (complementary neutral) */
+    --color-secondary-50: oklch(0.99 0.005 80);
+    --color-secondary-100: oklch(0.97 0.01 80);
+    --color-secondary-200: oklch(0.94 0.015 75);
+    --color-secondary-300: oklch(0.90 0.02 70);
+    --color-secondary-400: oklch(0.84 0.025 65);
+    --color-secondary-500: oklch(0.78 0.03 60);
+    --color-secondary-600: oklch(0.68 0.03 55);
+    --color-secondary-700: oklch(0.56 0.025 50);
+    --color-secondary-800: oklch(0.47 0.02 45);
+    --color-secondary-900: oklch(0.39 0.015 40);
+    --color-secondary-950: oklch(0.26 0.01 35);
+
+    /* Accent - Fresh Green (for fresh ingredients/herbs) */
+    --color-accent-50: oklch(0.97 0.02 145);
+    --color-accent-100: oklch(0.94 0.04 145);
+    --color-accent-200: oklch(0.89 0.08 145);
+    --color-accent-300: oklch(0.82 0.13 145);
+    --color-accent-400: oklch(0.73 0.16 145);
+    --color-accent-500: oklch(0.65 0.17 145);
+    --color-accent-600: oklch(0.56 0.15 145);
+    --color-accent-700: oklch(0.47 0.12 145);
+    --color-accent-800: oklch(0.40 0.10 145);
+    --color-accent-900: oklch(0.34 0.08 145);
+    --color-accent-950: oklch(0.23 0.05 145);
+
+    /* Success - Leafy Green */
+    --color-success-50: oklch(0.97 0.02 150);
+    --color-success-100: oklch(0.94 0.04 150);
+    --color-success-200: oklch(0.88 0.09 150);
+    --color-success-300: oklch(0.80 0.14 150);
+    --color-success-400: oklch(0.71 0.17 150);
+    --color-success-500: oklch(0.62 0.17 150);
+    --color-success-600: oklch(0.54 0.15 150);
+    --color-success-700: oklch(0.45 0.12 150);
+    --color-success-800: oklch(0.38 0.10 150);
+    --color-success-900: oklch(0.32 0.08 150);
+    --color-success-950: oklch(0.21 0.05 150);
+
+    /* Warning - Golden Yellow */
+    --color-warning-50: oklch(0.98 0.02 85);
+    --color-warning-100: oklch(0.96 0.04 85);
+    --color-warning-200: oklch(0.92 0.09 85);
+    --color-warning-300: oklch(0.87 0.14 80);
+    --color-warning-400: oklch(0.80 0.17 75);
+    --color-warning-500: oklch(0.74 0.18 70);
+    --color-warning-600: oklch(0.66 0.16 65);
+    --color-warning-700: oklch(0.55 0.13 60);
+    --color-warning-800: oklch(0.47 0.11 55);
+    --color-warning-900: oklch(0.40 0.09 50);
+    --color-warning-950: oklch(0.27 0.06 45);
+
+    /* Error - Rich Red */
+    --color-error-50: oklch(0.97 0.02 20);
+    --color-error-100: oklch(0.94 0.04 20);
+    --color-error-200: oklch(0.89 0.09 20);
+    --color-error-300: oklch(0.82 0.14 20);
+    --color-error-400: oklch(0.73 0.18 20);
+    --color-error-500: oklch(0.64 0.20 20);
+    --color-error-600: oklch(0.55 0.19 20);
+    --color-error-700: oklch(0.46 0.16 20);
+    --color-error-800: oklch(0.39 0.13 20);
+    --color-error-900: oklch(0.34 0.10 20);
+    --color-error-950: oklch(0.23 0.07 20);
+
+    /* Neutral Grays - Slightly warm for food context */
+    --color-neutral-50: oklch(0.98 0.002 45);
+    --color-neutral-100: oklch(0.96 0.003 45);
+    --color-neutral-200: oklch(0.92 0.004 45);
+    --color-neutral-300: oklch(0.86 0.005 45);
+    --color-neutral-400: oklch(0.71 0.006 45);
+    --color-neutral-500: oklch(0.57 0.006 45);
+    --color-neutral-600: oklch(0.47 0.005 45);
+    --color-neutral-700: oklch(0.40 0.004 45);
+    --color-neutral-800: oklch(0.30 0.003 45);
+    --color-neutral-900: oklch(0.22 0.002 45);
+    --color-neutral-950: oklch(0.14 0.001 45);
+}
