@@ -16,4 +16,8 @@
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="9.8.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Homemade.Web\Homemade.Web.csproj" />
+    </ItemGroup>
+
 </Project>
