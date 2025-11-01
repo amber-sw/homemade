@@ -19,10 +19,10 @@ builder.AddHomemadeDatabase();
 builder.Services.AddAuthentication()
     .AddKeycloakJwtBearer(
         serviceName: "keycloak",
-        realm: "WeatherShop",
+        realm: "Homemade",
         configureOptions: options =>
         {
-            options.Audience = "weather.api";
+            options.Audience = "homemade.search";
 
             // For development only - disable HTTPS metadata validation
             // In production, use explicit Authority configuration instead

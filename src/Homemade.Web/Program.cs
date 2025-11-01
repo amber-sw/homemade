@@ -17,11 +17,11 @@ builder.Services.AddHybridCache();
 builder.AddRedisDistributedCache("cache");
 
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddKeycloakOpenIdConnect("keycloak", realm: "WeatherShop", OpenIdConnectDefaults.AuthenticationScheme, options =>
+    .AddKeycloakOpenIdConnect("keycloak", realm: "Homemade", OpenIdConnectDefaults.AuthenticationScheme, options =>
     {
-        options.ClientId = "WeatherWeb";
+        options.ClientId = "web-interface";
         options.ResponseType = OpenIdConnectResponseType.Code;
-        options.Scope.Add("weather:all");
+        options.Scope.Add("recipes:all");
         options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
         options.SaveTokens = true;
         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -55,6 +55,11 @@ app.UseHttpsRedirection();
 
 
 app.UseAntiforgery();
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapGet("/keycloak", () => Results.Challenge());
+app.MapGet("/logout", () => Results.SignOut());
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
