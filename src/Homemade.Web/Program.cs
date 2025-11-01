@@ -19,9 +19,10 @@ builder.AddRedisDistributedCache("cache");
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddKeycloakOpenIdConnect("keycloak", realm: "Homemade", OpenIdConnectDefaults.AuthenticationScheme, options =>
     {
-        options.ClientId = "web-interface";
+        options.ClientId = "homemade.web";
+        options.ClientSecret = builder.Configuration["Keycloak:ClientSecret"];
         options.ResponseType = OpenIdConnectResponseType.Code;
-        options.Scope.Add("recipes:all");
+        options.Scope.Add("homemade:api");
         options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
         options.SaveTokens = true;
         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -58,8 +59,20 @@ app.UseAntiforgery();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapGet("/keycloak", () => Results.Challenge());
-app.MapGet("/logout", () => Results.SignOut());
+app.MapGet("/keycloak", () => Results.Challenge(
+    properties: new Microsoft.AspNetCore.Authentication.AuthenticationProperties
+    {
+        RedirectUri = "/"
+    },
+    authenticationSchemes: [OpenIdConnectDefaults.AuthenticationScheme]
+));
+app.MapGet("/logout", () => Results.SignOut(
+    properties: new Microsoft.AspNetCore.Authentication.AuthenticationProperties
+    {
+        RedirectUri = "/"
+    },
+    authenticationSchemes: [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]
+));
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

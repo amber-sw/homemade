@@ -22,7 +22,7 @@ builder.Services.AddAuthentication()
         realm: "Homemade",
         configureOptions: options =>
         {
-            options.Audience = "homemade.search";
+            options.Audience = "homemade.api";
 
             // For development only - disable HTTPS metadata validation
             // In production, use explicit Authority configuration instead

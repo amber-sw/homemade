@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+    <PropertyGroup>
+      <UserSecretsId>77ce77fa-240e-4872-ada8-c8a248035df6</UserSecretsId>
+    </PropertyGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\Homemade.Search.Client\Homemade.Search.Client.csproj" />
       <ProjectReference Include="..\Homemade.ServiceDefaults\Homemade.ServiceDefaults.csproj" />
