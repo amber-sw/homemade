@@ -78,6 +78,13 @@ Always verify compilation after making larger code changes:
 dotnet build
 ```
 
+After making code changes, run the code formatter to enforce consistent coding style:
+```bash
+dotnet format
+```
+
+**Best practice**: Run `dotnet format` before committing changes to ensure code consistency across the project.
+
 ### Package Management Policy
 - **Always use the `dotnet` CLI** to add packages (never edit `.csproj` manually for package additions)
 - Use `dotnet package add <PackageName> --project <ProjectPath>` to add NuGet packages
