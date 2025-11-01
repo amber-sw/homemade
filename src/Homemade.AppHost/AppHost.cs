@@ -21,7 +21,7 @@ builder.AddProject<Homemade_Migrations>("migrations")
     .WithReference(database)
     .WaitFor(database);
 
-builder.AddProject<Homemade_Search>("search")
+var search = builder.AddProject<Homemade_Search>("search")
     .WithHttpHealthCheck("/health")
     .WithReference(keycloak)
     .WithReference(database);
@@ -29,6 +29,7 @@ builder.AddProject<Homemade_Search>("search")
 builder.AddProject<Homemade_Web>("web")
     .WithHttpHealthCheck("/health")
     .WithReference(keycloak)
-    .WithReference(cache);
+    .WithReference(cache)
+    .WithReference(search);
 
 builder.Build().Run();

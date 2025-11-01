@@ -1,9 +1,10 @@
-using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 
 using Grpc.Core;
 
 using Homemade.Database;
+using Homemade.Search.Grpc;
+using Homemade.Search.Grpc.Models;
 
 namespace Homemade.Search.Services;
 
@@ -42,9 +43,9 @@ public sealed class SearchService(
                     Notes = recipe.Notes,
                     CreatedAt = recipe.CreatedAt.ToTimestamp(),
                     UpdatedAt = recipe.UpdatedAt?.ToTimestamp(),
-                    Ingredients = {},
-                    Instructions = {},
-                    Tags = {}
+                    Ingredients = { },
+                    Instructions = { },
+                    Tags = { }
                 }
             };
 

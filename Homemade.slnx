@@ -5,6 +5,7 @@
   </Folder>
   <Folder Name="/Libraries/">
     <Project Path="src\Homemade.Database\Homemade.Database.csproj" />
+    <Project Path="src\Homemade.Search.Client\Homemade.Search.Client.csproj" Type="Classic C#" />
   </Folder>
   <Project Path="src\Homemade.Migrations\Homemade.Migrations.csproj" />
   <Project Path="src\Homemade.Search\Homemade.Search.csproj" Type="Classic C#" />

@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.33.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.71.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.76.0" PrivateAssets="All" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.13.0-beta.1" />
+    <PackageReference Include="Riok.Mapperly" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Protobuf Include="..\Homemade.Search\Protos\models.proto" GrpcServices="None" Link="Protos\models.proto" />
+    <Protobuf Include="..\Homemade.Search\Protos\search.proto" GrpcServices="Client" Link="Protos\search.proto" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Homemade.ServiceDefaults\Homemade.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

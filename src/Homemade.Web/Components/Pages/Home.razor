@@ -1,4 +1,7 @@
 ﻿@page "/"
+@using Grpc.Core
+@using Homemade.Search.Grpc
+@inject RecipeSearch.RecipeSearchClient SearchClient
 
 <PageTitle>Home</PageTitle>
 
@@ -17,3 +20,41 @@
         <NavLink href="/Recipes/1">Recipe detail</NavLink>
     </li>
 </ul>
+
+<button @onclick="OnClick">call</button>
+<ul>
+    @foreach (var reply in _replies)
+    {
+        <li>@reply.Recipe.Name</li>
+    }
+</ul>
+
+@if (_exception != null)
+{
+    <p>@_exception.Message</p>
+    <p>@_exception.StackTrace</p>
+}
+
+@code {
+    private Exception? _exception;
+    private List<SearchReply> _replies = [];
+
+    public async Task OnClick()
+    {
+        try
+        {
+            _replies = await SearchClient.Search(new()
+                {
+                    SearchText = "chicken"
+                })
+                .ResponseStream
+                .ReadAllAsync()
+                .ToListAsync();
+        }
+        catch (Exception exception)
+        {
+            _exception = exception;
+        }
+    }
+
+}
