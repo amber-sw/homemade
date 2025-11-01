@@ -1,4 +1,10 @@
+using System.IdentityModel.Tokens.Jwt;
+
 using Homemade.Web.Components;
+
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
@@ -6,6 +12,28 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddHybridCache();
+builder.AddRedisDistributedCache("cache");
+
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddKeycloakOpenIdConnect("keycloak", realm: "WeatherShop", OpenIdConnectDefaults.AuthenticationScheme, options =>
+    {
+        options.ClientId = "WeatherWeb";
+        options.ResponseType = OpenIdConnectResponseType.Code;
+        options.Scope.Add("weather:all");
+        options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
+        options.SaveTokens = true;
+        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    
+        // For development only - disable HTTPS metadata validation
+        // In production, use explicit Authority configuration instead
+        if (builder.Environment.IsDevelopment())
+        {
+            options.RequireHttpsMetadata = false;
+        }
+    })
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 
 var app = builder.Build();
 

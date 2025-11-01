@@ -5,17 +5,20 @@ var builder = DistributedApplication.CreateBuilder(args);
 builder.AddPostgres("postgres")
     .AddDatabase("recipes");
 
-builder.AddKeycloak("keycloak");
+var keycloak = builder.AddKeycloak("keycloak");
     // .WithRealmImport("../../keycloak/realms");
 
 builder.AddOllama("ollama")
+    .WithDataVolume()
     .AddModel("gemma3:1b");
 
-builder.AddGarnet("cache");
+var cache = builder.AddGarnet("cache");
 
 builder.AddMailPit("mailpit");
 
 builder.AddProject<Homemade_Web>("web")
-    .WithHttpHealthCheck("/health");
+    .WithHttpHealthCheck("/health")
+    .WithReference(keycloak)
+    .WithReference(cache);
 
 builder.Build().Run();

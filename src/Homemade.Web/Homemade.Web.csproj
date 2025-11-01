@@ -10,4 +10,11 @@
       <ProjectReference Include="..\Homemade.ServiceDefaults\Homemade.ServiceDefaults.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Aspire.Keycloak.Authentication" Version="9.5.2-preview.1.25522.3" />
+      <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.2" />
+      <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.5.2" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.10.0" />
+    </ItemGroup>
+
 </Project>
