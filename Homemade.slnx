@@ -1,11 +1,12 @@
 <Solution>
-	<Folder Name="/Aspire/">
-		<Project Path="src\Homemade.AppHost\Homemade.AppHost.csproj"/>
-		<Project Path="src\Homemade.ServiceDefaults\Homemade.ServiceDefaults.csproj"/>
-	</Folder>
-	<Folder Name="/Libraries/">
-		<Project Path="src\Homemade.Database\Homemade.Database.csproj"/>
-	</Folder>
-	<Project Path="src\Homemade.Migrations\Homemade.Migrations.csproj"/>
-	<Project Path="src\Homemade.Web\Homemade.Web.csproj"/>
+  <Folder Name="/Aspire/">
+    <Project Path="src\Homemade.AppHost\Homemade.AppHost.csproj" />
+    <Project Path="src\Homemade.ServiceDefaults\Homemade.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/Libraries/">
+    <Project Path="src\Homemade.Database\Homemade.Database.csproj" />
+  </Folder>
+  <Project Path="src\Homemade.Migrations\Homemade.Migrations.csproj" />
+  <Project Path="src\Homemade.Search\Homemade.Search.csproj" Type="Classic C#" />
+  <Project Path="src\Homemade.Web\Homemade.Web.csproj" />
 </Solution>
