@@ -1,5 +1,4 @@
 using Homemade.Database;
-using Homemade.Database.Extensions;
 using Homemade.Migrations.Hosted;
 
 var builder = Host.CreateApplicationBuilder(args);

@@ -6,7 +6,7 @@ var database = builder.AddPostgres("postgres")
     .AddDatabase("recipes");
 
 var keycloak = builder.AddKeycloak("keycloak");
-    // .WithRealmImport("../../keycloak/realms");
+// .WithRealmImport("../../keycloak/realms");
 
 builder.AddOllama("ollama")
     .WithDataVolume()

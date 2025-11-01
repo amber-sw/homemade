@@ -25,7 +25,7 @@ builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
         options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
         options.SaveTokens = true;
         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    
+
         // For development only - disable HTTPS metadata validation
         // In production, use explicit Authority configuration instead
         if (builder.Environment.IsDevelopment())

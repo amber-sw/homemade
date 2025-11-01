@@ -12,14 +12,20 @@ using OpenTelemetry.Trace;
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.Hosting;
 
-// Adds common Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
-// This project should be referenced by each service project in your solution.
-// To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
+/// <summary>
+/// Add common Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
+/// This project should be referenced by each service project in your solution.
+/// To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
+/// </summary>
 public static class Extensions
 {
     private const string HealthEndpointPath = "/health";
     private const string AlivenessEndpointPath = "/alive";
 
+    /// <summary>
+    /// Adds Aspire services to the application.
+    /// This involves setting up health checks, service discovery, and OpenTelemetry.
+    /// </summary>
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.ConfigureOpenTelemetry();
@@ -46,6 +52,9 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds Aspire's default OpenTelemetry configuration.
+    /// </summary>
     public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder)
         where TBuilder : IHostApplicationBuilder
     {
@@ -101,6 +110,9 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds Aspire's default health checks.
+    /// </summary>
     public static TBuilder AddDefaultHealthChecks<TBuilder>(this TBuilder builder)
         where TBuilder : IHostApplicationBuilder
     {
@@ -111,6 +123,12 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>
+    /// For ASP.NET Core applications, adds default health check endpoints.
+    /// </summary>
+    /// <remarks>
+    /// These paths are mapped under <see cref="HealthEndpointPath" /> and <see cref="AlivenessEndpointPath" />.
+    /// </remarks>
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
         // Adding health checks endpoints to applications in non-development environments has security implications.
