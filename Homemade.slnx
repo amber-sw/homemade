@@ -3,5 +3,7 @@
     <Project Path="src\Homemade.AppHost\Homemade.AppHost.csproj" />
     <Project Path="src\Homemade.ServiceDefaults\Homemade.ServiceDefaults.csproj" />
   </Folder>
+  <Project Path="src\Homemade.Database\Homemade.Database.csproj" Type="Classic C#" />
+  <Project Path="src\Homemade.Migrations\Homemade.Migrations.csproj" Type="Classic C#" />
   <Project Path="src\Homemade.Web\Homemade.Web.csproj" Type="Classic C#" />
 </Solution>

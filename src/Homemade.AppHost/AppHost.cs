@@ -2,7 +2,7 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddPostgres("postgres")
+var database = builder.AddPostgres("postgres")
     .AddDatabase("recipes");
 
 var keycloak = builder.AddKeycloak("keycloak");
@@ -15,6 +15,10 @@ builder.AddOllama("ollama")
 var cache = builder.AddGarnet("cache");
 
 builder.AddMailPit("mailpit");
+
+builder.AddProject<Homemade_Migrations>("migrations")
+    .WithReference(database)
+    .WaitFor(database);
 
 builder.AddProject<Homemade_Web>("web")
     .WithHttpHealthCheck("/health")

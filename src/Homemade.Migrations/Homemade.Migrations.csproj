@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+	<PropertyGroup>
+		<UserSecretsId>dotnet-Homemade.Migrations-f6d49598-38eb-498b-818d-23c968f5402f</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.2"/>
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.10"/>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Homemade.Database\Homemade.Database.csproj"/>
+		<ProjectReference Include="..\Homemade.ServiceDefaults\Homemade.ServiceDefaults.csproj"/>
+	</ItemGroup>
+</Project>
