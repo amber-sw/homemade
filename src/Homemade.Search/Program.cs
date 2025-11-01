@@ -14,6 +14,8 @@ builder.WebHost.ConfigureKestrel(options =>
     });
 });
 
+builder.AddHomemadeDatabase();
+
 builder.Services.AddAuthentication()
     .AddKeycloakJwtBearer(
         serviceName: "keycloak",
@@ -40,7 +42,7 @@ var app = builder.Build();
 app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
-app.MapGrpcService<GreeterService>().RequireAuthorization();
+app.MapGrpcService<SearchService>().RequireAuthorization();
 app.MapGet("/",
     () =>
         "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");

@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+option csharp_namespace = "Homemade.Search";
+
+package search;
+
+// The recipe search service definition.
+service RecipeSearch {
+	// Searches for recipes matching the given criteria
+	rpc Search (SearchRequest) returns (stream SearchReply);
+}
+
+// The request message containing the user's name.
+message SearchRequest {
+	string searchText = 1;
+}
+
+// The response message containing the search results.
+message SearchReply {
+	// Returned recipe
+	Recipe recipe = 1;
+}
+
+// Represents a recipe in the system.
+message Recipe {
+	// The unique identifier for the recipe.
+	int64 id = 1;
+
+	// The name of the recipe.
+	string name = 2;
+
+	// The emoji icon representing the recipe.
+	string icon = 3;
+
+	// The description of the recipe.
+	string description = 4;
+
+	// The preparation time.
+	google.protobuf.Duration preparation_time = 5;
+
+	// The cooking time.
+	google.protobuf.Duration cooking_time = 6;
+
+	// The number of servings the recipe yields.
+	int32 servings = 7;
+
+	// The difficulty level of the recipe.
+	RecipeDifficulty difficulty = 8;
+
+	// Optional notes or tips for the recipe.
+	optional string notes = 9;
+
+	// The date and time when the recipe was created.
+	google.protobuf.Timestamp created_at = 10;
+
+	// The date and time when the recipe was last updated.
+	optional google.protobuf.Timestamp updated_at = 11;
+
+	// The list of ingredients for this recipe.
+	repeated RecipeIngredient ingredients = 12;
+
+	// The list of instructions for this recipe.
+	repeated Instruction instructions = 13;
+
+	// The tags associated with this recipe.
+	repeated Tag tags = 14;
+}
+
+// Represents the difficulty level of a recipe.
+enum RecipeDifficulty {
+	// Unspecified difficulty.
+	RECIPE_DIFFICULTY_UNSPECIFIED = 0;
+
+	// Easy difficulty - suitable for beginners.
+	RECIPE_DIFFICULTY_EASY = 1;
+
+	// Medium difficulty - requires some cooking experience.
+	RECIPE_DIFFICULTY_MEDIUM = 2;
+
+	// Hard difficulty - requires advanced cooking skills.
+	RECIPE_DIFFICULTY_HARD = 3;
+}
+
+// Information of a specific ingredient that can be shared among recipes.
+message Ingredient {
+	// The unique identifier for the ingredient.
+	int64 id = 1;
+
+	// The name of this ingredient (e.g., "Tomato").
+	string name = 2;
+
+	// The plural form of the ingredient name (e.g., "Tomatoes").
+	string plural = 3;
+
+	// The unit of measurement for this ingredient (e.g., "kg", "slices", "leaves").
+	string unit = 4;
+}
+
+// Represents the amount of an ingredient in a recipe.
+message RecipeIngredient {
+	// The primary key for the recipe ingredient.
+	int64 id = 1;
+
+	// The ingredient.
+	Ingredient ingredient = 2;
+
+	// The amount of the ingredient needed for this recipe.
+	// Expressed in the ingredient's unit.
+	double amount = 3;
+}
+
+// Represents a step in a recipe's instructions.
+message Instruction {
+	// The unique identifier for the recipe instruction.
+	int64 id = 1;
+
+	// The instruction text for this step.
+	string text = 2;
+
+	// The order in which this instruction should be displayed.
+	int32 order = 3;
+}
+
+// Represents a tag that can be associated with recipes (e.g., "Italian", "Vegetarian", "Quick & Easy").
+message Tag {
+	// The unique identifier for the tag.
+	int64 id = 1;
+
+	// The name of the tag.
+	string name = 2;
+}

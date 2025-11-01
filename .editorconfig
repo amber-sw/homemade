@@ -8,7 +8,7 @@ indent_style = space
 [*.xml]
 indent_size = 2
 
-[*{slnx,csproj}]
+[*{slnx,csproj,proto}]
 indent_style = tab
 tab_width = 4
 
