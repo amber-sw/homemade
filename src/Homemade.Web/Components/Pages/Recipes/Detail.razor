@@ -1,0 +1,348 @@
+@page "/Recipes/{Id:int}"
+
+<PageTitle>@(recipe?.Name ?? "Recipe") - Homemade</PageTitle>
+
+<div class="min-h-screen bg-gradient-to-b from-primary-50 to-white">
+    <div class="container mx-auto px-4 py-12">
+        @if (recipe != null)
+        {
+            <!-- Recipe Header -->
+            <div class="max-w-4xl mx-auto mb-8">
+                <a href="/" class="inline-flex items-center text-neutral-600 hover:text-primary-600 mb-6 transition-colors">
+                    <span class="mr-2">←</span> Back to recipes
+                </a>
+
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <!-- Recipe Image/Icon -->
+                    <div class="h-80 bg-gradient-to-br from-primary-200 to-primary-300 flex items-center justify-center">
+                        <span class="text-9xl">@recipe.Icon</span>
+                    </div>
+
+                    <!-- Recipe Title & Metadata -->
+                    <div class="p-8">
+                        <h1 class="text-4xl font-bold text-neutral-900 mb-4">@recipe.Name</h1>
+
+                        <p class="text-lg text-neutral-600 mb-6">@recipe.Description</p>
+
+                        <!-- Meta Info -->
+                        <div class="flex flex-wrap gap-6 mb-6 pb-6 border-b border-neutral-200">
+                            <div class="flex items-center text-neutral-600">
+                                <span class="text-2xl mr-2">⏱️</span>
+                                <div>
+                                    <div class="text-xs text-neutral-500">Prep Time</div>
+                                    <div class="font-semibold">@recipe.PrepTime min</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-neutral-600">
+                                <span class="text-2xl mr-2">🍳</span>
+                                <div>
+                                    <div class="text-xs text-neutral-500">Cook Time</div>
+                                    <div class="font-semibold">@recipe.CookTime min</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-neutral-600">
+                                <span class="text-2xl mr-2">👥</span>
+                                <div>
+                                    <div class="text-xs text-neutral-500">Servings</div>
+                                    <div class="font-semibold">@recipe.Servings</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-neutral-600">
+                                <span class="text-2xl mr-2">📊</span>
+                                <div>
+                                    <div class="text-xs text-neutral-500">Difficulty</div>
+                                    <div class="font-semibold">@recipe.Difficulty</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tags -->
+                        @if (recipe.Tags.Any())
+                        {
+                            <div class="flex flex-wrap gap-2">
+                                @foreach (var tag in recipe.Tags)
+                                {
+                                    <span class="px-3 py-1 bg-accent-100 text-accent-700 rounded-full text-sm font-medium">
+                                        @tag
+                                    </span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recipe Content -->
+            <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
+                <!-- Ingredients Section -->
+                <div class="md:col-span-1">
+                    <div class="bg-white rounded-xl shadow p-6 sticky top-6">
+                        <h2 class="text-2xl font-bold text-neutral-800 mb-4">Ingredients</h2>
+
+                        <ul class="space-y-3">
+                            @foreach (var ingredient in recipe.Ingredients)
+                            {
+                                <li class="flex items-start">
+                                    <input
+                                        type="checkbox"
+                                        class="mt-1 mr-3 w-4 h-4 text-primary-500 border-neutral-300 rounded focus:ring-primary-500"
+                                        @onchange="@(() => ToggleIngredient(ingredient))"
+                                        checked="@checkedIngredients.Contains(ingredient)"
+                                    />
+                                    <span class="text-neutral-700 @(checkedIngredients.Contains(ingredient) ? "line-through text-neutral-400" : "")">
+                                        @ingredient
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+
+                        @if (recipe.Ingredients.Any())
+                        {
+                            <button
+                                class="w-full mt-6 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors text-sm font-semibold"
+                                @onclick="AddToShoppingList">
+                                Add to Shopping List
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Instructions Section -->
+                <div class="md:col-span-2">
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <h2 class="text-2xl font-bold text-neutral-800 mb-6">Instructions</h2>
+
+                        <div class="space-y-6">
+                            @for (int i = 0; i < recipe.Instructions.Count; i++)
+                            {
+                                var step = recipe.Instructions[i];
+                                var stepNumber = i + 1;
+                                <div class="flex gap-4">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 rounded-full bg-primary-500 text-white flex items-center justify-center font-bold">
+                                            @stepNumber
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 pt-1">
+                                        <p class="text-neutral-700 leading-relaxed">@step</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Notes Section -->
+                        @if (!string.IsNullOrWhiteSpace(recipe.Notes))
+                        {
+                            <div class="mt-8 p-4 bg-warning-50 border-l-4 border-warning-500 rounded">
+                                <h3 class="text-lg font-semibold text-warning-800 mb-2">Chef's Notes</h3>
+                                <p class="text-warning-700">@recipe.Notes</p>
+                            </div>
+                        }
+
+                        <!-- Nutrition Info -->
+                        @if (recipe.NutritionInfo != null)
+                        {
+                            <div class="mt-8 p-6 bg-secondary-50 rounded-xl">
+                                <h3 class="text-lg font-semibold text-neutral-800 mb-4">Nutrition Information</h3>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    <div>
+                                        <div class="text-sm text-neutral-500">Calories</div>
+                                        <div class="text-xl font-bold text-neutral-800">@recipe.NutritionInfo.Calories</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm text-neutral-500">Protein</div>
+                                        <div class="text-xl font-bold text-neutral-800">@recipe.NutritionInfo.Protein</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm text-neutral-500">Carbs</div>
+                                        <div class="text-xl font-bold text-neutral-800">@recipe.NutritionInfo.Carbs</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm text-neutral-500">Fat</div>
+                                        <div class="text-xl font-bold text-neutral-800">@recipe.NutritionInfo.Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-6 flex gap-4">
+                        <button class="flex-1 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors font-semibold">
+                            Save Recipe
+                        </button>
+                        <button class="flex-1 py-3 bg-neutral-100 text-neutral-700 rounded-xl hover:bg-neutral-200 transition-colors font-semibold">
+                            Share
+                        </button>
+                        <button class="px-6 py-3 bg-neutral-100 text-neutral-700 rounded-xl hover:bg-neutral-200 transition-colors">
+                            <span class="text-xl">🖨️</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Recipes -->
+            @if (relatedRecipes.Any())
+            {
+                <div class="max-w-4xl mx-auto mt-16">
+                    <h2 class="text-3xl font-bold text-neutral-800 mb-6">You Might Also Like</h2>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        @foreach (var related in relatedRecipes)
+                        {
+                            <a href="/recipes/@related.Id" class="bg-white rounded-xl shadow overflow-hidden hover:shadow-lg transition-shadow">
+                                <div class="h-40 bg-gradient-to-br from-primary-200 to-primary-300 flex items-center justify-center">
+                                    <span class="text-5xl">@related.Icon</span>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="text-lg font-semibold text-neutral-800 mb-1">@related.Name</h3>
+                                    <div class="flex items-center text-sm text-neutral-600">
+                                        <span class="mr-3">⏱️ @related.CookTime min</span>
+                                        <span>👥 @related.Servings</span>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Loading State -->
+            <div class="max-w-4xl mx-auto text-center py-16">
+                <div class="text-6xl mb-4">🍽️</div>
+                <h2 class="text-2xl font-semibold text-neutral-800 mb-2">Loading recipe...</h2>
+                <p class="text-neutral-600">Please wait while we fetch the delicious details</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private RecipeDetail? recipe;
+    private List<RecipeCard> relatedRecipes = new();
+    private HashSet<string> checkedIngredients = new();
+
+    protected override void OnInitialized()
+    {
+        // TODO: Fetch recipe from database/API using Id
+        // For now, using mock data
+        LoadMockRecipe();
+        LoadRelatedRecipes();
+    }
+
+    private void LoadMockRecipe()
+    {
+        recipe = new RecipeDetail
+        {
+            Id = Id,
+            Name = "Classic Chicken Pasta",
+            Icon = "🍝",
+            Description = "A creamy and delicious pasta dish with tender chicken, perfect for a weeknight dinner. This comforting meal comes together in under an hour and is sure to please the whole family.",
+            PrepTime = 15,
+            CookTime = 30,
+            Servings = 4,
+            Difficulty = "Easy",
+            Tags = new[] { "Italian", "Pasta", "Chicken", "Comfort Food", "Quick & Easy" },
+            Ingredients = new List<string>
+            {
+                "400g pasta (penne or fettuccine)",
+                "500g chicken breast, diced",
+                "2 cups heavy cream",
+                "1 cup parmesan cheese, grated",
+                "3 cloves garlic, minced",
+                "2 tablespoons olive oil",
+                "1 cup cherry tomatoes, halved",
+                "Fresh basil leaves",
+                "Salt and pepper to taste",
+                "1 teaspoon Italian seasoning"
+            },
+            Instructions = new List<string>
+            {
+                "Bring a large pot of salted water to boil. Cook pasta according to package directions until al dente. Reserve 1 cup of pasta water before draining.",
+                "While pasta cooks, heat olive oil in a large skillet over medium-high heat. Season chicken with salt, pepper, and Italian seasoning.",
+                "Add chicken to the skillet and cook for 6-8 minutes until golden brown and cooked through. Remove from pan and set aside.",
+                "In the same skillet, add minced garlic and sauté for 30 seconds until fragrant. Be careful not to burn it.",
+                "Pour in heavy cream and bring to a gentle simmer. Let it cook for 3-4 minutes, stirring occasionally, until slightly thickened.",
+                "Add parmesan cheese and stir until melted and smooth. If the sauce is too thick, add some reserved pasta water to reach desired consistency.",
+                "Return the cooked chicken to the pan along with the drained pasta. Toss everything together until well coated.",
+                "Add cherry tomatoes and cook for another 2 minutes until they just start to soften.",
+                "Taste and adjust seasoning with salt and pepper. Garnish with fresh basil leaves and extra parmesan if desired.",
+                "Serve immediately while hot. Enjoy your homemade creamy chicken pasta!"
+            },
+            Notes = "For a lighter version, you can substitute half the heavy cream with chicken stock. Add some crushed red pepper flakes if you like a bit of heat. Leftovers can be stored in an airtight container in the fridge for up to 3 days.",
+            NutritionInfo = new NutritionInfo
+            {
+                Calories = "650 kcal",
+                Protein = "42g",
+                Carbs = "58g",
+                Fat = "26g"
+            }
+        };
+    }
+
+    private void LoadRelatedRecipes()
+    {
+        relatedRecipes = new List<RecipeCard>
+        {
+            new RecipeCard { Id = 2, Name = "Vegetable Stir Fry", Icon = "🥘", CookTime = 20, Servings = 2 },
+            new RecipeCard { Id = 3, Name = "Tomato Soup", Icon = "🍲", CookTime = 25, Servings = 4 },
+            new RecipeCard { Id = 4, Name = "Caesar Salad", Icon = "🥗", CookTime = 15, Servings = 2 }
+        };
+    }
+
+    private void ToggleIngredient(string ingredient)
+    {
+        if (checkedIngredients.Contains(ingredient))
+        {
+            checkedIngredients.Remove(ingredient);
+        }
+        else
+        {
+            checkedIngredients.Add(ingredient);
+        }
+    }
+
+    private void AddToShoppingList()
+    {
+        // TODO: Implement shopping list functionality
+        Console.WriteLine("Adding ingredients to shopping list");
+    }
+
+    private class RecipeDetail
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public string Description { get; set; } = "";
+        public int PrepTime { get; set; }
+        public int CookTime { get; set; }
+        public int Servings { get; set; }
+        public string Difficulty { get; set; } = "";
+        public string[] Tags { get; set; } = Array.Empty<string>();
+        public List<string> Ingredients { get; set; } = new();
+        public List<string> Instructions { get; set; } = new();
+        public string Notes { get; set; } = "";
+        public NutritionInfo? NutritionInfo { get; set; }
+    }
+
+    private class NutritionInfo
+    {
+        public string Calories { get; set; } = "";
+        public string Protein { get; set; } = "";
+        public string Carbs { get; set; } = "";
+        public string Fat { get; set; } = "";
+    }
+
+    private class RecipeCard
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public int CookTime { get; set; }
+        public int Servings { get; set; }
+    }
+}

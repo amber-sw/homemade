@@ -1,0 +1,560 @@
+@page "/MealPlanner"
+@rendermode InteractiveServer
+
+<PageTitle>Meal Planner - Homemade</PageTitle>
+
+<div class="min-h-screen bg-gradient-to-b from-primary-50 to-white">
+    <div class="container mx-auto px-4 py-12">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-4xl font-bold text-neutral-900 mb-2">Meal Planner</h1>
+                    <p class="text-lg text-neutral-600">Plan your meals and generate shopping lists</p>
+                </div>
+                <div class="flex gap-3">
+                    @if (mealPlan.Any())
+                    {
+                        <button
+                            class="px-6 py-3 bg-accent-500 text-white rounded-xl hover:bg-accent-600 transition-colors font-semibold"
+                            @onclick="GenerateShoppingList">
+                            🛒 Shopping List
+                        </button>
+                    }
+                    <button
+                        class="px-6 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors font-semibold"
+                        @onclick="OpenGenerateModal">
+                        ✨ @(mealPlan.Any() ? "Regenerate Plan" : "Generate Meal Plan")
+                    </button>
+                </div>
+            </div>
+
+            <!-- Days Selector -->
+            @if (mealPlan.Any())
+            {
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-semibold text-neutral-700">Planning for:</label>
+                    <select
+                        class="px-4 py-2 border-2 border-neutral-200 rounded-lg focus:border-primary-500 focus:outline-none transition-colors"
+                        @bind="planDays"
+                        @bind:after="UpdatePlanDays">
+                        @for (int i = 3; i <= 14; i++)
+                        {
+                            <option value="@i">@i days</option>
+                        }
+                    </select>
+                    <button
+                        class="px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors text-sm font-semibold"
+                        @onclick="ClearPlan">
+                        Clear Plan
+                    </button>
+                </div>
+            }
+        </div>
+
+        @if (!mealPlan.Any())
+        {
+            <!-- Empty State -->
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-lg p-16 text-center">
+                    <div class="text-6xl mb-4">📅</div>
+                    <h2 class="text-3xl font-bold text-neutral-900 mb-3">No Meal Plan Yet</h2>
+                    <p class="text-lg text-neutral-600 mb-8">
+                        Let AI create a personalized meal plan based on ingredients you have and your preferences
+                    </p>
+                    <button
+                        class="px-8 py-4 bg-primary-500 text-white text-lg rounded-xl hover:bg-primary-600 transition-colors font-semibold"
+                        @onclick="OpenGenerateModal">
+                        Generate Your First Meal Plan
+                    </button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Meal Plan Calendar -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                @foreach (var day in mealPlan)
+                {
+                    var isToday = day.Date.Date == DateTime.Today;
+                    <div class="bg-white rounded-xl shadow p-4 @(isToday ? "ring-2 ring-primary-500" : "")">
+                        <!-- Day Header -->
+                        <div class="flex items-center justify-between mb-3 pb-3 border-b border-neutral-200">
+                            <div>
+                                <div class="text-sm font-semibold text-neutral-500">@day.Date.ToString("ddd")</div>
+                                <div class="text-lg font-bold text-neutral-900">@day.Date.ToString("MMM d")</div>
+                            </div>
+                            @if (isToday)
+                            {
+                                <span class="px-2 py-1 bg-primary-100 text-primary-700 rounded-full text-xs font-semibold">Today</span>
+                            }
+                        </div>
+
+                        <!-- Dinner Slot -->
+                        <div class="mb-2">
+                            <div class="text-xs font-semibold text-neutral-500 mb-2">DINNER</div>
+
+                            @if (day.Recipe != null)
+                            {
+                                <!-- Recipe Card -->
+                                <div class="group relative">
+                                    <a href="/recipes/@day.Recipe.Id" class="block p-3 bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg hover:shadow-md transition-shadow">
+                                        <div class="flex items-start gap-3">
+                                            <div class="text-3xl">@day.Recipe.Icon</div>
+                                            <div class="flex-1 min-w-0">
+                                                <h3 class="font-semibold text-neutral-900 text-sm mb-1 truncate">@day.Recipe.Name</h3>
+                                                <div class="flex items-center gap-2 text-xs text-neutral-600">
+                                                    <span>⏱️ @day.Recipe.CookTime min</span>
+                                                    <span>•</span>
+                                                    <span>@day.Recipe.Difficulty</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <!-- Remove Button -->
+                                    <button
+                                        class="absolute top-1 right-1 p-1 bg-white rounded-full text-error-600 hover:bg-error-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        @onclick="() => RemoveRecipeFromDay(day.Date)"
+                                        title="Remove recipe">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <!-- Empty Slot -->
+                                <button
+                                    class="w-full py-8 border-2 border-dashed border-neutral-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors text-neutral-500 hover:text-primary-600"
+                                    @onclick="() => OpenAddRecipeModal(day.Date)">
+                                    <div class="text-2xl mb-1">+</div>
+                                    <div class="text-sm font-semibold">Add Recipe</div>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Generate Meal Plan Modal -->
+@if (showGenerateModal)
+{
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @onclick="CloseGenerateModal">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" @onclick:stopPropagation>
+            <div class="p-8">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-neutral-900">Generate Meal Plan</h2>
+                    <button
+                        class="p-2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                        @onclick="CloseGenerateModal">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                @if (!isGenerating)
+                {
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Available Ingredients -->
+                        <div>
+                            <h3 class="text-xl font-semibold text-neutral-800 mb-4">Available Ingredients</h3>
+                            <p class="text-sm text-neutral-600 mb-4">What ingredients do you have on hand?</p>
+
+                            <!-- Ingredient Input -->
+                            <div class="mb-4">
+                                <div class="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Add ingredient..."
+                                        class="flex-1 px-4 py-2 border-2 border-neutral-200 rounded-lg focus:border-primary-500 focus:outline-none transition-colors"
+                                        @bind="currentIngredient"
+                                        @onkeypress="HandleIngredientKeyPress"
+                                    />
+                                    <button
+                                        class="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                                        @onclick="AddIngredient">
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Selected Ingredients -->
+                            @if (selectedIngredients.Any())
+                            {
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    @foreach (var ingredient in selectedIngredients)
+                                    {
+                                        <span class="inline-flex items-center px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm font-medium">
+                                            @ingredient
+                                            <button
+                                                class="ml-2 text-primary-600 hover:text-primary-800 font-bold"
+                                                @onclick="() => RemoveIngredient(ingredient)">
+                                                ×
+                                            </button>
+                                        </span>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Popular Ingredients -->
+                            <div>
+                                <p class="text-xs text-neutral-500 mb-2">Popular ingredients:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach (var suggestion in popularIngredients)
+                                    {
+                                        <button
+                                            class="px-2 py-1 bg-neutral-100 text-neutral-700 rounded-full text-xs hover:bg-primary-100 hover:text-primary-700 transition-colors"
+                                            @onclick="() => AddIngredientFromSuggestion(suggestion)">
+                                            + @suggestion
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preferences -->
+                        <div>
+                            <h3 class="text-xl font-semibold text-neutral-800 mb-4">Preferences</h3>
+
+                            <!-- Days -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-neutral-700 mb-2">Number of days</label>
+                                <select
+                                    class="w-full px-4 py-2 border-2 border-neutral-200 rounded-lg focus:border-primary-500 focus:outline-none transition-colors"
+                                    @bind="planDays">
+                                    @for (int i = 3; i <= 14; i++)
+                                    {
+                                        <option value="@i">@i days</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Dietary Restrictions -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-neutral-700 mb-2">Dietary Restrictions</label>
+                                <div class="space-y-2">
+                                    @foreach (var diet in dietaryOptions)
+                                    {
+                                        <label class="flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                class="mr-2 w-4 h-4 text-primary-500 border-neutral-300 rounded focus:ring-primary-500"
+                                                checked="@selectedDietary.Contains(diet)"
+                                                @onchange="() => ToggleDietary(diet)"
+                                            />
+                                            <span class="text-neutral-700">@diet</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Max Cook Time -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-neutral-700 mb-2">Max Cook Time</label>
+                                <select
+                                    class="w-full px-4 py-2 border-2 border-neutral-200 rounded-lg focus:border-primary-500 focus:outline-none transition-colors"
+                                    @bind="maxCookTime">
+                                    <option value="0">Any time</option>
+                                    <option value="30">Under 30 min</option>
+                                    <option value="45">Under 45 min</option>
+                                    <option value="60">Under 1 hour</option>
+                                </select>
+                            </div>
+
+                            <!-- Difficulty -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-neutral-700 mb-2">Difficulty</label>
+                                <div class="flex gap-2">
+                                    @foreach (var diff in new[] { "Easy", "Medium", "Hard" })
+                                    {
+                                        <button
+                                            class="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors @(selectedDifficulties.Contains(diff) ? "bg-primary-500 text-white" : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200")"
+                                            @onclick="() => ToggleDifficulty(diff)">
+                                            @diff
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div class="mt-8 flex gap-3">
+                        <button
+                            class="flex-1 py-3 bg-primary-500 text-white font-semibold rounded-xl hover:bg-primary-600 transition-colors"
+                            @onclick="GenerateMealPlan">
+                            Generate Meal Plan
+                        </button>
+                        <button
+                            class="px-6 py-3 bg-neutral-100 text-neutral-700 font-semibold rounded-xl hover:bg-neutral-200 transition-colors"
+                            @onclick="CloseGenerateModal">
+                            Cancel
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <!-- Generating State -->
+                    <div class="text-center py-16">
+                        <div class="text-6xl mb-4">🤖</div>
+                        <h3 class="text-2xl font-semibold text-neutral-800 mb-2">Generating Your Meal Plan...</h3>
+                        <p class="text-neutral-600 mb-6">AI is selecting the perfect recipes for you</p>
+                        <div class="flex justify-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Add Recipe Modal -->
+@if (showAddRecipeModal)
+{
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @onclick="CloseAddRecipeModal">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" @onclick:stopPropagation>
+            <div class="p-8">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-neutral-900">Add Recipe to @selectedDate.ToString("MMMM d")</h2>
+                    <button
+                        class="p-2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                        @onclick="CloseAddRecipeModal">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Recipe Grid -->
+                <div class="grid md:grid-cols-3 gap-4">
+                    @foreach (var recipe in availableRecipes)
+                    {
+                        <button
+                            class="bg-white border-2 border-neutral-200 rounded-xl overflow-hidden hover:border-primary-500 hover:shadow-lg transition-all text-left"
+                            @onclick="() => AddRecipeToDay(recipe)">
+                            <div class="h-32 bg-gradient-to-br from-primary-200 to-primary-300 flex items-center justify-center">
+                                <span class="text-4xl">@recipe.Icon</span>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-neutral-900 mb-1">@recipe.Name</h3>
+                                <div class="flex items-center gap-2 text-xs text-neutral-600">
+                                    <span>⏱️ @recipe.CookTime min</span>
+                                    <span>•</span>
+                                    <span>@recipe.Difficulty</span>
+                                </div>
+                            </div>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<MealPlanDay> mealPlan = new();
+    private bool showGenerateModal = false;
+    private bool showAddRecipeModal = false;
+    private bool isGenerating = false;
+    private DateTime selectedDate = DateTime.Today;
+    private int planDays = 7;
+
+    // Generation form state
+    private string currentIngredient = "";
+    private HashSet<string> selectedIngredients = new();
+    private HashSet<string> selectedDietary = new();
+    private HashSet<string> selectedDifficulties = new();
+    private int maxCookTime = 0;
+
+    private readonly string[] popularIngredients = { "Chicken", "Pasta", "Tomatoes", "Onions", "Garlic", "Rice", "Potatoes" };
+    private readonly string[] dietaryOptions = { "Vegetarian", "Vegan", "Gluten-Free", "Keto", "Dairy-Free" };
+
+    private List<RecipeCard> availableRecipes = new();
+
+    protected override void OnInitialized()
+    {
+        LoadAvailableRecipes();
+    }
+
+    private void LoadAvailableRecipes()
+    {
+        // TODO: Load from database
+        availableRecipes = new List<RecipeCard>
+        {
+            new() { Id = 1, Name = "Classic Chicken Pasta", Icon = "🍝", CookTime = 45, Difficulty = "Easy" },
+            new() { Id = 2, Name = "Vegetable Stir Fry", Icon = "🥘", CookTime = 20, Difficulty = "Easy" },
+            new() { Id = 3, Name = "Tomato Soup", Icon = "🍲", CookTime = 25, Difficulty = "Easy" },
+            new() { Id = 4, Name = "Beef Tacos", Icon = "🌮", CookTime = 30, Difficulty = "Easy" },
+            new() { Id = 5, Name = "Chicken Curry", Icon = "🍛", CookTime = 50, Difficulty = "Medium" },
+            new() { Id = 6, Name = "Grilled Salmon", Icon = "🐟", CookTime = 25, Difficulty = "Easy" },
+        };
+    }
+
+    private void OpenGenerateModal()
+    {
+        showGenerateModal = true;
+    }
+
+    private void CloseGenerateModal()
+    {
+        showGenerateModal = false;
+        isGenerating = false;
+    }
+
+    private void HandleIngredientKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(currentIngredient))
+        {
+            AddIngredient();
+        }
+    }
+
+    private void AddIngredient()
+    {
+        if (!string.IsNullOrWhiteSpace(currentIngredient) && !selectedIngredients.Contains(currentIngredient.Trim()))
+        {
+            selectedIngredients.Add(currentIngredient.Trim());
+            currentIngredient = "";
+        }
+    }
+
+    private void AddIngredientFromSuggestion(string ingredient)
+    {
+        if (!selectedIngredients.Contains(ingredient))
+        {
+            selectedIngredients.Add(ingredient);
+        }
+    }
+
+    private void RemoveIngredient(string ingredient)
+    {
+        selectedIngredients.Remove(ingredient);
+    }
+
+    private void ToggleDietary(string dietary)
+    {
+        if (selectedDietary.Contains(dietary))
+            selectedDietary.Remove(dietary);
+        else
+            selectedDietary.Add(dietary);
+    }
+
+    private void ToggleDifficulty(string difficulty)
+    {
+        if (selectedDifficulties.Contains(difficulty))
+            selectedDifficulties.Remove(difficulty);
+        else
+            selectedDifficulties.Add(difficulty);
+    }
+
+    private async Task GenerateMealPlan()
+    {
+        isGenerating = true;
+
+        // TODO: Call AI service to generate meal plan
+        await Task.Delay(3000); // Simulate AI generation
+
+        // Mock generated meal plan
+        mealPlan.Clear();
+        var startDate = DateTime.Today;
+        var random = new Random();
+
+        for (int i = 0; i < planDays; i++)
+        {
+            var recipe = availableRecipes[random.Next(availableRecipes.Count)];
+            mealPlan.Add(new MealPlanDay
+            {
+                Date = startDate.AddDays(i),
+                Recipe = recipe
+            });
+        }
+
+        isGenerating = false;
+        showGenerateModal = false;
+    }
+
+    private void UpdatePlanDays()
+    {
+        // Adjust meal plan when days change
+        if (mealPlan.Count > planDays)
+        {
+            mealPlan = mealPlan.Take(planDays).ToList();
+        }
+        else if (mealPlan.Count < planDays)
+        {
+            var lastDate = mealPlan.Last().Date;
+            for (int i = mealPlan.Count; i < planDays; i++)
+            {
+                mealPlan.Add(new MealPlanDay { Date = lastDate.AddDays(i - mealPlan.Count + 1) });
+            }
+        }
+    }
+
+    private void ClearPlan()
+    {
+        mealPlan.Clear();
+        selectedIngredients.Clear();
+        selectedDietary.Clear();
+        selectedDifficulties.Clear();
+    }
+
+    private void OpenAddRecipeModal(DateTime date)
+    {
+        selectedDate = date;
+        showAddRecipeModal = true;
+    }
+
+    private void CloseAddRecipeModal()
+    {
+        showAddRecipeModal = false;
+    }
+
+    private void AddRecipeToDay(RecipeCard recipe)
+    {
+        var day = mealPlan.FirstOrDefault(d => d.Date.Date == selectedDate.Date);
+        if (day != null)
+        {
+            day.Recipe = recipe;
+        }
+        CloseAddRecipeModal();
+    }
+
+    private void RemoveRecipeFromDay(DateTime date)
+    {
+        var day = mealPlan.FirstOrDefault(d => d.Date.Date == date.Date);
+        if (day != null)
+        {
+            day.Recipe = null;
+        }
+    }
+
+    private void GenerateShoppingList()
+    {
+        // TODO: Aggregate ingredients and navigate to shopping list page
+        // For now, just show a console message
+        Console.WriteLine("Generating shopping list from meal plan...");
+    }
+
+    private class MealPlanDay
+    {
+        public DateTime Date { get; set; }
+        public RecipeCard? Recipe { get; set; }
+    }
+
+    private class RecipeCard
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public int CookTime { get; set; }
+        public string Difficulty { get; set; } = "";
+    }
+}

@@ -1,0 +1,444 @@
+@page "/Recipes"
+
+<PageTitle>Browse Recipes - Homemade</PageTitle>
+
+<div class="min-h-screen bg-gradient-to-b from-primary-50 to-white">
+    <div class="container mx-auto px-4 py-12">
+        <!-- Header -->
+        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-4xl font-bold text-neutral-900 mb-2">Browse Recipes</h1>
+                <p class="text-lg text-neutral-600">@GetFilteredRecipes().Count recipes available</p>
+            </div>
+            <a href="/recipes/import" class="inline-flex items-center px-6 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors font-semibold">
+                <span class="mr-2">+</span> Import Recipe
+            </a>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Filters Sidebar -->
+            <div class="lg:w-80 flex-shrink-0">
+                <div class="bg-white rounded-xl shadow-lg p-6 lg:sticky lg:top-6">
+                    <!-- Mobile Filter Toggle -->
+                    <button
+                        class="lg:hidden w-full flex items-center justify-between mb-4 py-2 text-neutral-800 font-semibold"
+                        @onclick="ToggleFilters">
+                        <span>Filters @(GetActiveFilterCount() > 0 ? $"({GetActiveFilterCount()})" : "")</span>
+                        <span>@(showFilters ? "▼" : "▶")</span>
+                    </button>
+
+                    <div class="@(showFilters ? "block" : "hidden lg:block")">
+                        <!-- Search -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-neutral-700 mb-2">Search</label>
+                            <input
+                                type="text"
+                                placeholder="Search recipes..."
+                                class="w-full px-4 py-2 border-2 border-neutral-200 rounded-lg focus:border-primary-500 focus:outline-none transition-colors"
+                                @bind="searchQuery"
+                                @bind:event="oninput"
+                            />
+                        </div>
+
+                        <!-- Category Filter -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-neutral-700 mb-2">Category</label>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach (var category in availableCategories)
+                                {
+                                    <button
+                                        class="px-3 py-1 rounded-full text-sm font-medium transition-colors @(selectedCategories.Contains(category) ? "bg-primary-100 text-primary-700" : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200")"
+                                        @onclick="() => ToggleCategory(category)">
+                                        @category
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Dietary Filter -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-neutral-700 mb-2">Dietary</label>
+                            <div class="space-y-2">
+                                @foreach (var diet in availableDietary)
+                                {
+                                    <label class="flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            class="mr-2 w-4 h-4 text-primary-500 border-neutral-300 rounded focus:ring-primary-500"
+                                            checked="@selectedDietary.Contains(diet)"
+                                            @onchange="() => ToggleDietary(diet)"
+                                        />
+                                        <span class="text-neutral-700">@diet</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Difficulty Filter -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-neutral-700 mb-2">Difficulty</label>
+                            <div class="flex gap-2">
+                                @foreach (var difficulty in availableDifficulties)
+                                {
+                                    <button
+                                        class="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors @(selectedDifficulties.Contains(difficulty) ? "bg-primary-500 text-white" : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200")"
+                                        @onclick="() => ToggleDifficulty(difficulty)">
+                                        @difficulty
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Time Filter -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-neutral-700 mb-2">Cook Time</label>
+                            <select
+                                class="w-full px-4 py-2 border-2 border-neutral-200 rounded-lg focus:border-primary-500 focus:outline-none transition-colors"
+                                @bind="selectedTimeFilter">
+                                <option value="all">Any time</option>
+                                <option value="quick">Under 30 min</option>
+                                <option value="medium">30-60 min</option>
+                                <option value="long">Over 60 min</option>
+                            </select>
+                        </div>
+
+                        <!-- Clear Filters -->
+                        @if (GetActiveFilterCount() > 0)
+                        {
+                            <button
+                                class="w-full py-2 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors font-semibold"
+                                @onclick="ClearAllFilters">
+                                Clear All Filters
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recipe Grid -->
+            <div class="flex-1">
+                <!-- Sort & View Controls -->
+                <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm font-semibold text-neutral-700">Sort by:</label>
+                        <select
+                            class="px-4 py-2 border-2 border-neutral-200 rounded-lg focus:border-primary-500 focus:outline-none transition-colors"
+                            @bind="sortBy">
+                            <option value="newest">Newest First</option>
+                            <option value="name">Alphabetical</option>
+                            <option value="time">Quickest First</option>
+                        </select>
+                    </div>
+
+                    @if (GetActiveFilterCount() > 0)
+                    {
+                        <div class="text-sm text-neutral-600">
+                            Showing @GetPaginatedRecipes().Count of @GetFilteredRecipes().Count recipes
+                        </div>
+                    }
+                </div>
+
+                <!-- Recipe Grid -->
+                @if (GetFilteredRecipes().Any())
+                {
+                    <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                        @foreach (var recipe in GetPaginatedRecipes())
+                        {
+                            <a href="/recipes/@recipe.Id" class="bg-white rounded-xl shadow overflow-hidden hover:shadow-lg transition-shadow">
+                                <div class="h-48 bg-gradient-to-br from-primary-200 to-primary-300 flex items-center justify-center relative">
+                                    <span class="text-6xl">@recipe.Icon</span>
+                                    @if (recipe.IngredientCount > 0)
+                                    {
+                                        <span class="absolute top-3 right-3 px-2 py-1 bg-white rounded-full text-xs font-semibold text-neutral-700">
+                                            @recipe.IngredientCount ingredients
+                                        </span>
+                                    }
+                                </div>
+                                <div class="p-5">
+                                    <h3 class="text-xl font-semibold text-neutral-800 mb-2">@recipe.Name</h3>
+
+                                    <!-- Tags -->
+                                    @if (recipe.Tags.Any())
+                                    {
+                                        <div class="flex flex-wrap gap-1 mb-3">
+                                            @foreach (var tag in recipe.Tags.Take(3))
+                                            {
+                                                <span class="text-xs px-2 py-1 bg-accent-100 text-accent-700 rounded-full">@tag</span>
+                                            }
+                                            @if (recipe.Tags.Length > 3)
+                                            {
+                                                <span class="text-xs px-2 py-1 bg-neutral-100 text-neutral-600 rounded-full">+@(recipe.Tags.Length - 3)</span>
+                                            }
+                                        </div>
+                                    }
+
+                                    <!-- Meta Info -->
+                                    <div class="flex items-center justify-between text-sm text-neutral-600">
+                                        <div class="flex items-center gap-3">
+                                            <span>⏱️ @recipe.TotalTime min</span>
+                                            <span>👥 @recipe.Servings</span>
+                                        </div>
+                                        <span class="px-2 py-1 bg-neutral-100 text-neutral-700 rounded text-xs font-medium">
+                                            @recipe.Difficulty
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (GetTotalPages() > 1)
+                    {
+                        <div class="flex justify-center items-center gap-2">
+                            <button
+                                class="px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled="@(currentPage == 1)"
+                                @onclick="PreviousPage">
+                                Previous
+                            </button>
+
+                            <div class="flex gap-1">
+                                @for (int i = 1; i <= GetTotalPages(); i++)
+                                {
+                                    var pageNum = i;
+                                    <button
+                                        class="w-10 h-10 rounded-lg font-semibold transition-colors @(currentPage == pageNum ? "bg-primary-500 text-white" : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200")"
+                                        @onclick="() => GoToPage(pageNum)">
+                                        @pageNum
+                                    </button>
+                                }
+                            </div>
+
+                            <button
+                                class="px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled="@(currentPage == GetTotalPages())"
+                                @onclick="NextPage">
+                                Next
+                            </button>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <!-- Empty State -->
+                    <div class="bg-white rounded-2xl shadow-lg p-16 text-center">
+                        <div class="text-6xl mb-4">🔍</div>
+                        <h2 class="text-2xl font-bold text-neutral-800 mb-2">No Recipes Found</h2>
+                        <p class="text-neutral-600 mb-6">Try adjusting your filters or search terms</p>
+                        @if (GetActiveFilterCount() > 0)
+                        {
+                            <button
+                                class="px-6 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors font-semibold"
+                                @onclick="ClearAllFilters">
+                                Clear All Filters
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="/recipes/import" class="inline-block px-6 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors font-semibold">
+                                Import Your First Recipe
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool showFilters = false;
+    private string searchQuery = "";
+    private string sortBy = "newest";
+    private string selectedTimeFilter = "all";
+
+    private HashSet<string> selectedCategories = new();
+    private HashSet<string> selectedDietary = new();
+    private HashSet<string> selectedDifficulties = new();
+
+    private int currentPage = 1;
+    private int recipesPerPage = 12;
+
+    private readonly string[] availableCategories = { "Italian", "Asian", "Mexican", "American", "Mediterranean", "French", "Indian" };
+    private readonly string[] availableDietary = { "Vegetarian", "Vegan", "Gluten-Free", "Keto", "Low-Carb", "Dairy-Free" };
+    private readonly string[] availableDifficulties = { "Easy", "Medium", "Hard" };
+
+    private List<RecipeCard> allRecipes = new();
+
+    protected override void OnInitialized()
+    {
+        LoadMockRecipes();
+    }
+
+    private void LoadMockRecipes()
+    {
+        // TODO: Load from database
+        allRecipes = new List<RecipeCard>
+        {
+            new() { Id = 1, Name = "Classic Chicken Pasta", Icon = "🍝", Tags = new[] { "Italian", "Pasta", "Quick & Easy" }, TotalTime = 45, Servings = 4, Difficulty = "Easy", IngredientCount = 10 },
+            new() { Id = 2, Name = "Vegetable Stir Fry", Icon = "🥘", Tags = new[] { "Asian", "Vegetarian", "Quick & Easy" }, TotalTime = 20, Servings = 2, Difficulty = "Easy", IngredientCount = 8 },
+            new() { Id = 3, Name = "Tomato Soup", Icon = "🍲", Tags = new[] { "Comfort Food", "Vegetarian" }, TotalTime = 25, Servings = 4, Difficulty = "Easy", IngredientCount = 6 },
+            new() { Id = 4, Name = "Caesar Salad", Icon = "🥗", Tags = new[] { "Salad", "Quick & Easy" }, TotalTime = 15, Servings = 2, Difficulty = "Easy", IngredientCount = 7 },
+            new() { Id = 5, Name = "Beef Tacos", Icon = "🌮", Tags = new[] { "Mexican", "Quick & Easy" }, TotalTime = 30, Servings = 4, Difficulty = "Easy", IngredientCount = 12 },
+            new() { Id = 6, Name = "Margherita Pizza", Icon = "🍕", Tags = new[] { "Italian", "Vegetarian" }, TotalTime = 90, Servings = 4, Difficulty = "Medium", IngredientCount = 8 },
+            new() { Id = 7, Name = "Chicken Curry", Icon = "🍛", Tags = new[] { "Indian", "Spicy" }, TotalTime = 50, Servings = 6, Difficulty = "Medium", IngredientCount = 15 },
+            new() { Id = 8, Name = "Grilled Salmon", Icon = "🐟", Tags = new[] { "Seafood", "Healthy", "Keto" }, TotalTime = 25, Servings = 2, Difficulty = "Easy", IngredientCount = 6 },
+            new() { Id = 9, Name = "Pad Thai", Icon = "🍜", Tags = new[] { "Asian", "Vegetarian" }, TotalTime = 35, Servings = 4, Difficulty = "Medium", IngredientCount = 14 },
+            new() { Id = 10, Name = "French Onion Soup", Icon = "🫕", Tags = new[] { "French", "Comfort Food", "Vegetarian" }, TotalTime = 70, Servings = 4, Difficulty = "Medium", IngredientCount = 8 },
+            new() { Id = 11, Name = "Chocolate Cake", Icon = "🍰", Tags = new[] { "Dessert", "Baking" }, TotalTime = 120, Servings = 12, Difficulty = "Hard", IngredientCount = 10 },
+            new() { Id = 12, Name = "Breakfast Burrito", Icon = "🌯", Tags = new[] { "Mexican", "Breakfast", "Quick & Easy" }, TotalTime = 20, Servings = 2, Difficulty = "Easy", IngredientCount = 9 },
+            new() { Id = 13, Name = "Greek Salad", Icon = "🥙", Tags = new[] { "Mediterranean", "Vegetarian", "Healthy" }, TotalTime = 15, Servings = 4, Difficulty = "Easy", IngredientCount = 8 },
+            new() { Id = 14, Name = "Ramen Bowl", Icon = "🍥", Tags = new[] { "Asian", "Comfort Food" }, TotalTime = 40, Servings = 2, Difficulty = "Medium", IngredientCount = 12 },
+            new() { Id = 15, Name = "Apple Pie", Icon = "🥧", Tags = new[] { "Dessert", "Baking", "American" }, TotalTime = 150, Servings = 8, Difficulty = "Hard", IngredientCount = 11 },
+        };
+    }
+
+    private void ToggleFilters()
+    {
+        showFilters = !showFilters;
+    }
+
+    private void ToggleCategory(string category)
+    {
+        if (selectedCategories.Contains(category))
+            selectedCategories.Remove(category);
+        else
+            selectedCategories.Add(category);
+
+        currentPage = 1; // Reset to first page
+    }
+
+    private void ToggleDietary(string dietary)
+    {
+        if (selectedDietary.Contains(dietary))
+            selectedDietary.Remove(dietary);
+        else
+            selectedDietary.Add(dietary);
+
+        currentPage = 1;
+    }
+
+    private void ToggleDifficulty(string difficulty)
+    {
+        if (selectedDifficulties.Contains(difficulty))
+            selectedDifficulties.Remove(difficulty);
+        else
+            selectedDifficulties.Add(difficulty);
+
+        currentPage = 1;
+    }
+
+    private int GetActiveFilterCount()
+    {
+        int count = 0;
+        if (!string.IsNullOrWhiteSpace(searchQuery)) count++;
+        count += selectedCategories.Count;
+        count += selectedDietary.Count;
+        count += selectedDifficulties.Count;
+        if (selectedTimeFilter != "all") count++;
+        return count;
+    }
+
+    private void ClearAllFilters()
+    {
+        searchQuery = "";
+        selectedCategories.Clear();
+        selectedDietary.Clear();
+        selectedDifficulties.Clear();
+        selectedTimeFilter = "all";
+        currentPage = 1;
+    }
+
+    private List<RecipeCard> GetFilteredRecipes()
+    {
+        var filtered = allRecipes.AsEnumerable();
+
+        // Search filter
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            filtered = filtered.Where(r => r.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Category filter
+        if (selectedCategories.Any())
+        {
+            filtered = filtered.Where(r => r.Tags.Any(t => selectedCategories.Contains(t)));
+        }
+
+        // Dietary filter
+        if (selectedDietary.Any())
+        {
+            filtered = filtered.Where(r => r.Tags.Any(t => selectedDietary.Contains(t)));
+        }
+
+        // Difficulty filter
+        if (selectedDifficulties.Any())
+        {
+            filtered = filtered.Where(r => selectedDifficulties.Contains(r.Difficulty));
+        }
+
+        // Time filter
+        filtered = selectedTimeFilter switch
+        {
+            "quick" => filtered.Where(r => r.TotalTime < 30),
+            "medium" => filtered.Where(r => r.TotalTime >= 30 && r.TotalTime <= 60),
+            "long" => filtered.Where(r => r.TotalTime > 60),
+            _ => filtered
+        };
+
+        // Sort
+        filtered = sortBy switch
+        {
+            "name" => filtered.OrderBy(r => r.Name),
+            "time" => filtered.OrderBy(r => r.TotalTime),
+            _ => filtered.OrderByDescending(r => r.Id) // newest first (by ID)
+        };
+
+        return filtered.ToList();
+    }
+
+    private List<RecipeCard> GetPaginatedRecipes()
+    {
+        var filtered = GetFilteredRecipes();
+        return filtered
+            .Skip((currentPage - 1) * recipesPerPage)
+            .Take(recipesPerPage)
+            .ToList();
+    }
+
+    private int GetTotalPages()
+    {
+        var totalRecipes = GetFilteredRecipes().Count;
+        return (int)Math.Ceiling((double)totalRecipes / recipesPerPage);
+    }
+
+    private void GoToPage(int page)
+    {
+        currentPage = page;
+    }
+
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+            currentPage--;
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < GetTotalPages())
+            currentPage++;
+    }
+
+    private class RecipeCard
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public string[] Tags { get; set; } = Array.Empty<string>();
+        public int TotalTime { get; set; }
+        public int Servings { get; set; }
+        public string Difficulty { get; set; } = "";
+        public int IngredientCount { get; set; }
+    }
+}
