@@ -5,8 +5,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 var database = builder.AddPostgres("postgres")
     .AddDatabase("recipes");
 
-var keycloak = builder.AddKeycloak("keycloak");
-// .WithRealmImport("../../keycloak/realms");
+var keycloak = builder.AddKeycloak("keycloak")
+    .WithBindMount("../../keycloak/themes", "/opt/keycloak/themes")
+    .WithRealmImport("../../keycloak/realms");
 
 builder.AddOllama("ollama")
     .WithDataVolume()

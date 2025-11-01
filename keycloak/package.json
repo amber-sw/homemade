@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "tailwindcss -i theme.css -o themes/homemade/login/resources/css/homemade.css"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.16",
+    "tailwindcss": "^4.1.16"
+  }
+}
