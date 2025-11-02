@@ -1,4 +1,4 @@
-using Homemade.Search.Client.Handles;
+using Homemade.Search.Client.Handlers;
 using Homemade.Search.Grpc;
 
 using OpenTelemetry.Trace;

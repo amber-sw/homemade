@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
-namespace Homemade.Search.Client.Handles;
+namespace Homemade.Search.Client.Handlers;
 
 /// <summary>
 /// Attaches the access token from the current user to the outgoing request.
