@@ -485,6 +485,7 @@ $RECYCLE.BIN/
 
 # Generated files
 src/Homemade.Web/wwwroot/app.css
+src/Homemade.Search/index/
 .tailwind/
 
 # Local configuration

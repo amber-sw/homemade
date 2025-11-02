@@ -17,14 +17,15 @@ var cache = builder.AddGarnet("cache");
 
 builder.AddMailPit("mailpit");
 
-builder.AddProject<Homemade_Migrations>("migrations")
+var migrations = builder.AddProject<Homemade_Migrations>("migrations")
     .WithReference(database)
     .WaitFor(database);
 
 var search = builder.AddProject<Homemade_Search>("search")
     .WithHttpHealthCheck("/health")
     .WithReference(keycloak)
-    .WithReference(database);
+    .WithReference(database)
+    .WaitForCompletion(migrations);
 
 builder.AddProject<Homemade_Web>("web")
     .WithHttpHealthCheck("/health")

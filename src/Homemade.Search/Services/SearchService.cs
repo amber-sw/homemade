@@ -6,43 +6,48 @@ using Homemade.Database;
 using Homemade.Search.Grpc;
 using Homemade.Search.Grpc.Models;
 
+using Lucene.Net.Analysis.Standard;
+using Lucene.Net.Documents.Extensions;
+using Lucene.Net.QueryParsers.Classic;
+using Lucene.Net.Search;
+using Lucene.Net.Util;
+
 namespace Homemade.Search.Services;
 
 /// <summary>
 /// The gRPC service for searching recipes.
 /// </summary>
 public sealed class SearchService(
-    HomemadeContext dbContext
+    IndexSearcher searcher
 ) : RecipeSearch.RecipeSearchBase
 {
     /// <inheritdoc />
-    public override async Task Search(SearchRequest request, IServerStreamWriter<SearchReply> stream, ServerCallContext context)
+    public override async Task Search(SearchRequest request, IServerStreamWriter<SearchReply> stream,
+        ServerCallContext context)
     {
-        var recipes = dbContext.Recipes.AsAsyncEnumerable();
+        var query = new QueryParser(LuceneVersion.LUCENE_48, nameof(Recipe.Name),
+            new StandardAnalyzer(LuceneVersion.LUCENE_48)).Parse(request.SearchText);
+        var topDocs = searcher.Search(query, 100);
 
-        await foreach (var recipe in recipes.WithCancellation(context.CancellationToken))
+        foreach (var scoreDoc in topDocs.ScoreDocs)
         {
+            var document = searcher.Doc(scoreDoc.Doc);
+
             var response = new SearchReply
             {
                 Recipe = new Recipe
                 {
-                    Id = recipe.Id,
-                    Name = recipe.Name,
-                    Icon = recipe.Icon,
-                    Description = recipe.Description,
-                    PreparationTime = recipe.PreparationTime.ToDuration(),
-                    CookingTime = recipe.CookingTime.ToDuration(),
-                    Servings = recipe.Servings,
-                    Difficulty = recipe.Difficulty switch
-                    {
-                        Database.Entities.RecipeDifficulty.Easy => RecipeDifficulty.Easy,
-                        Database.Entities.RecipeDifficulty.Medium => RecipeDifficulty.Medium,
-                        Database.Entities.RecipeDifficulty.Hard => RecipeDifficulty.Hard,
-                        _ => RecipeDifficulty.Unspecified
-                    },
-                    Notes = recipe.Notes,
-                    CreatedAt = recipe.CreatedAt.ToTimestamp(),
-                    UpdatedAt = recipe.UpdatedAt?.ToTimestamp(),
+                    Id = document.GetField(nameof(Recipe.Id)).GetInt64ValueOrDefault(),
+                    Name = document.GetField(nameof(Recipe.Name)).GetStringValue(),
+                    Icon = string.Empty,
+                    Description = string.Empty,
+                    PreparationTime = Duration.FromTimeSpan(TimeSpan.Zero),
+                    CookingTime = Duration.FromTimeSpan(TimeSpan.Zero),
+                    Servings = 1,
+                    Difficulty = RecipeDifficulty.Unspecified,
+                    Notes = string.Empty,
+                    CreatedAt = Timestamp.FromDateTime(DateTime.UtcNow),
+                    UpdatedAt = Timestamp.FromDateTime(DateTime.UtcNow),
                     Ingredients = { },
                     Instructions = { },
                     Tags = { }

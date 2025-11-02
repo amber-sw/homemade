@@ -23,6 +23,9 @@
 
 <NavLink href="/keycloak">Sign in</NavLink>
 
+<br />
+
+<InputText @bind-Value="Query" />
 <button @onclick="OnClick">call</button>
 <ul>
     @foreach (var reply in _replies)
@@ -39,6 +42,7 @@
 
 @code {
     private Exception? _exception;
+    private string Query { get; set; } = string.Empty;
     private List<SearchReply> _replies = [];
 
     public async Task OnClick()
@@ -47,7 +51,7 @@
         {
             _replies = await SearchClient.Search(new()
                 {
-                    SearchText = "chicken"
+                    SearchText = Query
                 })
                 .ResponseStream
                 .ReadAllAsync()
