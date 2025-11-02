@@ -27,6 +27,8 @@
 
 <br />
 
+<h2>Search</h2>
+<p>Last call: @_lastCall</p>
 <InputText @bind-Value="Query" />
 <button @onclick="OnClick">call</button>
 <p>Reply count: @_replies.Count</p>
@@ -34,7 +36,7 @@
     @foreach (var reply in _replies)
     {
         <li>
-            <pre>@Encoding.UTF8.GetString(JsonSerializer.SerializeToUtf8Bytes(reply))</pre>
+            <pre>@Encoding.UTF8.GetString(JsonSerializer.SerializeToUtf8Bytes(reply, new JsonSerializerOptions { WriteIndented = true }))</pre>
         </li>
     }
 </ul>
@@ -46,6 +48,7 @@
 }
 
 @code {
+    private DateTime? _lastCall;
     private Exception? _exception;
     private string Query { get; set; } = string.Empty;
     private List<SearchResult> _replies = [];
@@ -54,9 +57,12 @@
     {
         try
         {
+            _exception = null;
+            _lastCall = DateTime.Now;
             _replies = await SearchClient.Search(new()
                 {
-                    SearchText = Query
+                    SearchText = Query,
+                    PageSize = 10,
                 })
                 .ResponseStream
                 .ReadAllAsync()

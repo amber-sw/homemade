@@ -2,9 +2,13 @@ using Homemade.Database;
 using Homemade.Database.Entities;
 using Homemade.Search.Mapping;
 
+using Lucene.Net.Facet.Taxonomy;
 using Lucene.Net.Index;
 
+using Lucent.Configuration;
+
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Homemade.Search.Services;
 
@@ -13,7 +17,9 @@ namespace Homemade.Search.Services;
 /// </summary>
 public sealed class IndexService(
     ILogger<IndexService> logger,
+    IOptionsSnapshot<IndexConfiguration> configuration,
     [FromKeyedServices(nameof(Recipe))] IndexWriter writer,
+    [FromKeyedServices(nameof(Recipe))] ITaxonomyWriter taxonomyWriter,
     HomemadeContext context
 )
 {
@@ -36,7 +42,12 @@ public sealed class IndexService(
             .AsAsyncEnumerable();
 
         await foreach (var recipe in recipes.WithCancellation(cancellationToken))
-            writer.AddDocument(RecipeDocumentMapper.Map(recipe));
+        {
+            var document = RecipeDocumentMapper.Map(recipe);
+            document = configuration.Get(nameof(Recipe)).FacetsConfig?.Build(taxonomyWriter, document) ?? document;
+
+            writer.AddDocument(document);
+        }
 
         logger.LogInformation("Index rebuild complete");
         writer.Commit();

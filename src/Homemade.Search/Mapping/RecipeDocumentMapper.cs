@@ -1,6 +1,7 @@
 using Homemade.Database.Entities;
 
 using Lucene.Net.Documents;
+using Lucene.Net.Facet;
 
 namespace Homemade.Search.Mapping;
 
@@ -29,10 +30,10 @@ public static class RecipeDocumentMapper
         };
 
         foreach (var tag in recipe.Tags)
-            document.Add(new TextField(nameof(Recipe.Tags), tag.Name, Field.Store.YES));
+            document.Add(new FacetField(nameof(Recipe.Tags), tag.Name));
 
         foreach (var recipeIngredient in recipe.Ingredients)
-            document.Add(new TextField(nameof(Recipe.Ingredients), recipeIngredient.Ingredient.Name, Field.Store.NO));
+            document.Add(new FacetField(nameof(Recipe.Ingredients), recipeIngredient.Ingredient.Name));
 
         foreach (var instruction in recipe.Instructions)
             document.Add(new TextField(nameof(Recipe.Instructions), instruction.Text, Field.Store.NO));
