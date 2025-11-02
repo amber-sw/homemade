@@ -33,6 +33,6 @@ public sealed class IndexConfigurator : IConfigureNamedOptions<IndexConfiguratio
 
         options.FacetsConfig = new FacetsConfig();
         options.FacetsConfig.SetMultiValued(nameof(Recipe.Tags), true);
-        options.FacetsConfig.SetMultiValued(nameof(RecipeIngredient.Ingredient), true);
+        options.FacetsConfig.SetMultiValued(nameof(Recipe.Ingredients), true);
     }
 }
