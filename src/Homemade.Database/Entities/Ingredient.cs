@@ -8,7 +8,7 @@ public sealed class Ingredient
     /// <summary>
     /// Gets or sets the unique identifier for the recipe.
     /// </summary>
-    public required long Id { get; set; }
+    public long Id { get; set; }
 
     /// <summary>
     /// The name of this ingredient.
@@ -22,15 +22,6 @@ public sealed class Ingredient
     /// The plural form of the ingredient name.
     /// </summary>
     /// <example>Tomatoes</example>
-    [Required]
     [MaxLength(200)]
-    public required string Plural { get; set; }
-
-    /// <summary>
-    /// The unit of measurement for this ingredient.
-    /// </summary>
-    /// <example>kg, slices, leafs</example>
-    [Required]
-    [MaxLength(100)]
-    public required string Unit { get; set; }
+    public string? Plural { get; set; }
 }

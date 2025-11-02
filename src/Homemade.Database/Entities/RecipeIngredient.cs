@@ -25,7 +25,14 @@ public sealed class RecipeIngredient
     /// <summary>
     /// The amount of the ingredient needed for this recipe.
     /// </summary>
-    /// <remarks>Expressed in <see cref="Ingredient.Unit" />.</remarks>
+    /// <remarks>Expressed in <see cref="RecipeIngredient.Unit" />.</remarks>
     [Required]
     public required double Amount { get; set; }
+
+    /// <summary>
+    /// The unit of measurement for this ingredient.
+    /// </summary>
+    /// <example>kg, slices, leafs</example>
+    [MaxLength(10)]
+    public string? Unit { get; set; }
 }

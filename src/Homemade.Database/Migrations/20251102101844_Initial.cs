@@ -1,7 +1,5 @@
 ﻿using System;
-
 using Microsoft.EntityFrameworkCore.Migrations;
-
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -21,8 +19,7 @@ namespace Homemade.Database.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Plural = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Unit = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    Plural = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -86,33 +83,6 @@ namespace Homemade.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RecipeIngredient",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RecipeId = table.Column<long>(type: "bigint", nullable: false),
-                    IngredientId = table.Column<long>(type: "bigint", nullable: false),
-                    Amount = table.Column<double>(type: "double precision", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RecipeIngredient", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RecipeIngredient_Ingredients_IngredientId",
-                        column: x => x.IngredientId,
-                        principalTable: "Ingredients",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RecipeIngredient_Recipes_RecipeId",
-                        column: x => x.RecipeId,
-                        principalTable: "Recipes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "RecipeTag",
                 columns: table => new
                 {
@@ -136,6 +106,40 @@ namespace Homemade.Database.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RecipeIngredient",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RecipeId = table.Column<long>(type: "bigint", nullable: false),
+                    IngredientId = table.Column<long>(type: "bigint", nullable: false),
+                    Amount = table.Column<double>(type: "double precision", nullable: false),
+                    Unit = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
+                    InstructionId = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecipeIngredient", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RecipeIngredient_Ingredients_IngredientId",
+                        column: x => x.IngredientId,
+                        principalTable: "Ingredients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RecipeIngredient_Instruction_InstructionId",
+                        column: x => x.InstructionId,
+                        principalTable: "Instruction",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_RecipeIngredient_Recipes_RecipeId",
+                        column: x => x.RecipeId,
+                        principalTable: "Recipes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Instruction_RecipeId",
                 table: "Instruction",
@@ -145,6 +149,11 @@ namespace Homemade.Database.Migrations
                 name: "IX_RecipeIngredient_IngredientId",
                 table: "RecipeIngredient",
                 column: "IngredientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecipeIngredient_InstructionId",
+                table: "RecipeIngredient",
+                column: "InstructionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RecipeIngredient_RecipeId",
@@ -161,9 +170,6 @@ namespace Homemade.Database.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Instruction");
-
-            migrationBuilder.DropTable(
                 name: "RecipeIngredient");
 
             migrationBuilder.DropTable(
@@ -173,10 +179,13 @@ namespace Homemade.Database.Migrations
                 name: "Ingredients");
 
             migrationBuilder.DropTable(
-                name: "Recipes");
+                name: "Instruction");
 
             migrationBuilder.DropTable(
                 name: "Tags");
+
+            migrationBuilder.DropTable(
+                name: "Recipes");
         }
     }
 }

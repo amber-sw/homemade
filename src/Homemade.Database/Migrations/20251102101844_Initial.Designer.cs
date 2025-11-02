@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Homemade.Database.Migrations
 {
     [DbContext(typeof(HomemadeContext))]
-    [Migration("20251101141846_Initial")]
+    [Migration("20251102101844_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -39,14 +39,8 @@ namespace Homemade.Database.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<string>("Plural")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -142,12 +136,21 @@ namespace Homemade.Database.Migrations
                     b.Property<long>("IngredientId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("InstructionId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("RecipeId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("IngredientId");
+
+                    b.HasIndex("InstructionId");
 
                     b.HasIndex("RecipeId");
 
@@ -206,6 +209,10 @@ namespace Homemade.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Homemade.Database.Entities.Instruction", null)
+                        .WithMany("Ingredients")
+                        .HasForeignKey("InstructionId");
+
                     b.HasOne("Homemade.Database.Entities.Recipe", "Recipe")
                         .WithMany("Ingredients")
                         .HasForeignKey("RecipeId")
@@ -230,6 +237,11 @@ namespace Homemade.Database.Migrations
                         .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Homemade.Database.Entities.Instruction", b =>
+                {
+                    b.Navigation("Ingredients");
                 });
 
             modelBuilder.Entity("Homemade.Database.Entities.Recipe", b =>

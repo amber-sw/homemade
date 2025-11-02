@@ -1,4 +1,5 @@
 using Homemade.Database;
+using Homemade.Database.Seeds;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,9 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static void AddHomemadeDatabase(this IHostApplicationBuilder builder)
     {
-        builder.AddNpgsqlDbContext<HomemadeContext>("recipes");
+        builder.AddNpgsqlDbContext<HomemadeContext>("recipes", null, options =>
+        {
+            options.UseAsyncSeeding(DatabaseSeeder.SeedAsync);
+        });
     }
 }

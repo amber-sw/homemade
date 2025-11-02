@@ -9,7 +9,7 @@ public sealed class Instruction
     /// Gets or sets the unique identifier for the recipe instruction.
     /// </summary>
     [Key]
-    public required long Id { get; set; }
+    public long Id { get; set; }
 
     /// <summary>
     /// Gets or sets the instruction text for this step.
@@ -25,8 +25,14 @@ public sealed class Instruction
     public required int Order { get; set; }
 
     /// <summary>
+    /// Optionally lists the ingredients referred to in this instruction.
+    /// This allows linking to the ingredients table.
+    /// </summary>
+    public List<RecipeIngredient> Ingredients { get; set; } = [];
+
+    /// <summary>
     /// Gets or sets the recipe this instruction belongs to.
     /// </summary>
     [Required]
-    public required Recipe Recipe { get; set; }
+    public Recipe Recipe { get; set; } = null!;
 }
