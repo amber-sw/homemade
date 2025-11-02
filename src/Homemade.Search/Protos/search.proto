@@ -1,5 +1,5 @@
 syntax = "proto3";
-import "models.proto";
+import "google/protobuf/duration.proto";
 
 option csharp_namespace = "Homemade.Search.Grpc";
 
@@ -8,16 +8,92 @@ package search;
 // The recipe search service definition.
 service RecipeSearch {
 	// Searches for recipes matching the given criteria
-	rpc Search (SearchRequest) returns (stream SearchReply);
+	rpc Search (SearchQuery) returns (stream SearchResult);
 }
 
-// The request message containing the user's name.
-message SearchRequest {
-	string searchText = 1;
+// The request message containing the search query.
+message SearchQuery {
+	// The (maximum) amount results per page.
+	int32 pageSize = 1;
+
+	// The page to fetch (for pagination), defaults to the first page.
+	optional int32 page = 2;
+	// The text the user entered in the free-text search box (if any).
+	optional string searchText = 3;
+
+	// A list of tags that the recipes should have.
+	repeated string Tags = 4;
+
+	// An optional difficulty to filter the recipes with.
+	optional int32 Difficulty = 5;
+
+	// If set only shows recipes whose cooking time is longer than this.
+	optional google.protobuf.Duration MinCookingTime = 6;
+
+	// If set only shows recipes whose cooking time is less than this.
+	optional int32 MaxCookingTime = 7;
 }
 
-// The response message containing the search results.
-message SearchReply {
-	// Returned recipe
-	Recipe recipe = 1;
+// The response message containing a single search result.
+message SearchResult {
+	// The total amount of results (not paged).
+	int32 count = 1;
+
+	// The amount of pages (calculated from the pageSize).
+	uint32 pageCount = 2;
+
+	// The maximum amount of results in a single page.
+	uint32 pageSize = 3;
+
+	// The ID of the recipe, used for linking and fetching details.
+	int64 recipeId = 4;
+
+	// The name of the recipe.
+	string recipeName = 5;
+
+	// The emoji of the recipe (if any).
+	optional string recipeIcon = 6;
+
+	// The tags associated with this recipe.
+	repeated string tags = 7;
+
+	// The total time in minutes (preparation + cooking).
+	int32 total_time_minutes = 8;
+
+	// The number of servings this recipe makes.
+	int32 servings = 9;
+
+	// The difficulty level of this recipe.
+	RecipeDifficulty difficulty = 10;
+
+	// The total number of ingredients in this recipe.
+	int32 ingredient_count = 11;
+
+	// Facet data (only populated in the first result of a stream).
+	optional Facets facets = 12;
+}
+
+// Represents a single facet value with its count.
+message Facet {
+	// The facet value (e.g., "Vegetarian", "Chicken").
+	string value = 1;
+
+	// The number of recipes with this facet value.
+	int32 count = 2;
+}
+
+// Contains all facet data for search results.
+message Facets {
+	// Tag facets with their counts.
+	repeated Facet tags = 1;
+
+	// Ingredient facets with their counts.
+	repeated Facet ingredients = 2;
+}
+
+// Recipe difficulty levels.
+enum RecipeDifficulty {
+	EASY = 0;
+	MEDIUM = 1;
+	HARD = 2;
 }

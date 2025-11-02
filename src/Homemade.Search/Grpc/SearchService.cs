@@ -1,11 +1,10 @@
-using Google.Protobuf.WellKnownTypes;
-
 using Grpc.Core;
 
-using Homemade.Search.Grpc.Models;
+using Homemade.Database.Entities;
 
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents.Extensions;
+using Lucene.Net.Index;
 using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
@@ -16,40 +15,41 @@ namespace Homemade.Search.Grpc;
 /// The gRPC service for searching recipes.
 /// </summary>
 public sealed class SearchService(
+    ILogger<SearchService> logger,
     [FromKeyedServices(nameof(Recipe))] IndexSearcher searcher
 ) : RecipeSearch.RecipeSearchBase
 {
-    /// <inheritdoc />
-    public override async Task Search(SearchRequest request, IServerStreamWriter<SearchReply> stream,
-        ServerCallContext context)
-    {
-        var query = new QueryParser(LuceneVersion.LUCENE_48, nameof(Recipe.Name),
-            new StandardAnalyzer(LuceneVersion.LUCENE_48)).Parse(request.SearchText);
-        var topDocs = searcher.Search(query, 100);
+    private static readonly QueryParser _parser = new QueryParser(LuceneVersion.LUCENE_48, nameof(Recipe.Name),
+        new StandardAnalyzer(LuceneVersion.LUCENE_48));
 
+    /// <inheritdoc />
+    public override async Task Search(
+        SearchQuery request,
+        IServerStreamWriter<SearchResult> stream,
+        ServerCallContext context
+    )
+    {
+        var query = _parser.Parse(request.SearchText);
+        logger.LogInformation("Searching for {SearchText}", query);
+        var topDocs = searcher.Search(query, 100);
         foreach (var scoreDoc in topDocs.ScoreDocs)
         {
             var document = searcher.Doc(scoreDoc.Doc);
 
-            var response = new SearchReply
+            var response = new SearchResult
             {
-                Recipe = new Recipe
-                {
-                    Id = document.GetField(nameof(Recipe.Id)).GetInt64ValueOrDefault(),
-                    Name = document.GetField(nameof(Recipe.Name)).GetStringValue(),
-                    Icon = string.Empty,
-                    Description = string.Empty,
-                    PreparationTime = Duration.FromTimeSpan(TimeSpan.Zero),
-                    CookingTime = Duration.FromTimeSpan(TimeSpan.Zero),
-                    Servings = 1,
-                    Difficulty = RecipeDifficulty.Unspecified,
-                    Notes = string.Empty,
-                    CreatedAt = Timestamp.FromDateTime(DateTime.UtcNow),
-                    UpdatedAt = Timestamp.FromDateTime(DateTime.UtcNow),
-                    Ingredients = { },
-                    Instructions = { },
-                    Tags = { }
-                }
+                Count = topDocs.TotalHits,
+                PageCount = 0,
+                PageSize = 0,
+                RecipeId = document.GetField(nameof(Recipe.Id)).GetInt64ValueOrDefault(),
+                RecipeName = document.Get(nameof(Recipe.Name)),
+                RecipeIcon = document.Get(nameof(Recipe.Icon)),
+                Tags = { },
+                TotalTimeMinutes = 0,
+                Servings = 0,
+                Difficulty = RecipeDifficulty.Easy,
+                IngredientCount = 0,
+                Facets = { }
             };
 
             await stream.WriteAsync(response, context.CancellationToken);

@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using System.Text
+@using System.Text.Json
 @using Grpc.Core
 @using Homemade.Search.Grpc
 @inject RecipeSearch.RecipeSearchClient SearchClient
@@ -27,10 +29,13 @@
 
 <InputText @bind-Value="Query" />
 <button @onclick="OnClick">call</button>
+<p>Reply count: @_replies.Count</p>
 <ul>
     @foreach (var reply in _replies)
     {
-        <li>@reply.Recipe.Name</li>
+        <li>
+            <pre>@Encoding.UTF8.GetString(JsonSerializer.SerializeToUtf8Bytes(reply))</pre>
+        </li>
     }
 </ul>
 
@@ -43,7 +48,7 @@
 @code {
     private Exception? _exception;
     private string Query { get; set; } = string.Empty;
-    private List<SearchReply> _replies = [];
+    private List<SearchResult> _replies = [];
 
     public async Task OnClick()
     {
