@@ -17,6 +17,8 @@ var cache = builder.AddGarnet("cache");
 
 builder.AddMailPit("mailpit");
 
+builder.AddNats("nats");
+
 var migrations = builder.AddProject<Homemade_Migrations>("migrations")
     .WithReference(database)
     .WaitFor(database);
