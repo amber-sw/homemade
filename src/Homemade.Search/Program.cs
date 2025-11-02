@@ -1,3 +1,6 @@
+using Homemade.Database.Entities;
+using Homemade.Search.Configuration;
+using Homemade.Search.Grpc;
 using Homemade.Search.Services;
 
 using Lucene.Net.Store;
@@ -5,6 +8,7 @@ using Lucene.Net.Store;
 using Lucent.Configuration;
 
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
@@ -41,15 +45,15 @@ builder.Services.AddAuthorizationBuilder();
 // Add services to the container.
 builder.Services.AddGrpc();
 
-builder.Services.AddLucentIndex();
-builder.Services.Configure<IndexConfiguration>(config => config.Directory = new MMapDirectory("index"));
-builder.Services.AddScoped<BuildIndexService>();
+builder.Services.AddNamedLucentIndex(nameof(Recipe));
+builder.Services.AddScoped<IndexService>();
+builder.Services.AddSingleton<IConfigureOptions<IndexConfiguration>, IndexConfigurator>();
 
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    await scope.ServiceProvider.GetRequiredService<BuildIndexService>().BuildIndex(CancellationToken.None);
+    await scope.ServiceProvider.GetRequiredService<IndexService>().BuildIndex(CancellationToken.None);
 }
 
 app.MapDefaultEndpoints();

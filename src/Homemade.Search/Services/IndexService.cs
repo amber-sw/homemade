@@ -11,9 +11,9 @@ namespace Homemade.Search.Services;
 /// <summary>
 /// Handles (re-)building the search index.
 /// </summary>
-public sealed class BuildIndexService(
-    ILogger<BuildIndexService> logger,
-    IndexWriter writer,
+public sealed class IndexService(
+    ILogger<IndexService> logger,
+    [FromKeyedServices(nameof(Recipe))] IndexWriter writer,
     HomemadeContext context
 )
 {
@@ -66,6 +66,7 @@ public sealed class BuildIndexService(
             writer.AddDocument(document);
         }
 
+        logger.LogInformation("Index rebuild complete");
         writer.Commit();
     }
 }

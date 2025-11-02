@@ -2,8 +2,6 @@ using Google.Protobuf.WellKnownTypes;
 
 using Grpc.Core;
 
-using Homemade.Database;
-using Homemade.Search.Grpc;
 using Homemade.Search.Grpc.Models;
 
 using Lucene.Net.Analysis.Standard;
@@ -12,13 +10,13 @@ using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
 
-namespace Homemade.Search.Services;
+namespace Homemade.Search.Grpc;
 
 /// <summary>
 /// The gRPC service for searching recipes.
 /// </summary>
 public sealed class SearchService(
-    IndexSearcher searcher
+    [FromKeyedServices(nameof(Recipe))] IndexSearcher searcher
 ) : RecipeSearch.RecipeSearchBase
 {
     /// <inheritdoc />
