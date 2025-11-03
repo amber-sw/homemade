@@ -49,7 +49,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 {
-    app.UseExceptionHandler("/Error");
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
