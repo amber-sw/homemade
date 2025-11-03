@@ -1,6 +1,9 @@
+using Homemade.AppHost.Extensions;
+
 using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
+builder.AddDockerComposeEnvironment("homemade");
 
 var database = builder.AddPostgres("postgres")
     .AddDatabase("recipes");
@@ -25,6 +28,7 @@ var migrations = builder.AddProject<Homemade_Migrations>("migrations")
 
 var search = builder.AddProject<Homemade_Search>("search")
     .WithHttpHealthCheck("/health")
+    .WithProjectMount("SEARCH-INDEX-MOUNT", "/app/index", "../../index", "Mount volume for the search index to be stored")
     .WithReference(keycloak)
     .WithReference(database)
     .WaitForCompletion(migrations);

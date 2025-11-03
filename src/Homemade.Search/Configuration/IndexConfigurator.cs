@@ -12,7 +12,9 @@ namespace Homemade.Search.Configuration;
 /// <summary>
 /// Configures the index file path for the <see cref="IndexConfiguration" />.
 /// </summary>
-public sealed class IndexConfigurator : IConfigureNamedOptions<IndexConfiguration>
+public sealed class IndexConfigurator(
+    string basePath
+) : IConfigureNamedOptions<IndexConfiguration>
 {
     /// <inheritdoc />
     public void Configure(IndexConfiguration options)
@@ -22,11 +24,11 @@ public sealed class IndexConfigurator : IConfigureNamedOptions<IndexConfiguratio
     public void Configure(string? name, IndexConfiguration options)
     {
         var path = string.IsNullOrWhiteSpace(name)
-            ? Path.Combine("index", "default", "documents")
-            : Path.Combine("index", name, "documents");
+            ? Path.Combine(basePath, "default", "documents")
+            : Path.Combine(basePath, name, "documents");
         var facetsPath = string.IsNullOrWhiteSpace(name)
-            ? Path.Combine("index", "default", "facets")
-            : Path.Combine("index", name, "facets");
+            ? Path.Combine(basePath, "default", "facets")
+            : Path.Combine(basePath, name, "facets");
 
         options.Directory = new MMapDirectory(path);
         options.FacetsDirectory = new MMapDirectory(facetsPath);

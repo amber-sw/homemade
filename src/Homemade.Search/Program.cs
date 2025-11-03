@@ -47,7 +47,8 @@ builder.Services.AddGrpc();
 
 builder.Services.AddNamedLucentIndex(nameof(Recipe));
 builder.Services.AddScoped<IndexService>();
-builder.Services.AddSingleton<IConfigureOptions<IndexConfiguration>, IndexConfigurator>();
+builder.Services.AddSingleton<IConfigureOptions<IndexConfiguration>>(_ =>
+    new IndexConfigurator(builder.Configuration.GetConnectionString("SEARCH-INDEX-MOUNT")!));
 
 var app = builder.Build();
 
