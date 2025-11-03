@@ -25,6 +25,8 @@
     --text-sm--line-height: calc(1.25 / 0.875);
     --text-xl: 1.25rem;
     --text-xl--line-height: calc(1.75 / 1.25);
+    --text-2xl: 1.5rem;
+    --text-2xl--line-height: calc(2 / 1.5);
     --text-3xl: 1.875rem;
     --text-3xl--line-height: calc(2.25 / 1.875);
     --font-weight-medium: 500;
@@ -42,6 +44,9 @@
     --color-primary-600: oklch(0.61 0.18 32);
     --color-primary-700: oklch(0.51 0.14 30);
     --color-secondary-50: oklch(0.99 0.005 80);
+    --color-secondary-100: oklch(0.97 0.01 80);
+    --color-secondary-200: oklch(0.94 0.015 75);
+    --color-secondary-500: oklch(0.78 0.03 60);
     --color-success-100: oklch(0.94 0.04 150);
     --color-success-300: oklch(0.80 0.14 150);
     --color-success-800: oklch(0.38 0.10 150);
@@ -372,6 +377,9 @@
   .bg-primary-500 {
     background-color: var(--color-primary-500);
   }
+  .bg-secondary-100 {
+    background-color: var(--color-secondary-100);
+  }
   .bg-success-100 {
     background-color: var(--color-success-100);
   }
@@ -425,6 +433,10 @@
   }
   .font-mono {
     font-family: var(--font-mono);
+  }
+  .text-2xl {
+    font-size: var(--text-2xl);
+    line-height: var(--tw-leading, var(--text-2xl--line-height));
   }
   .text-3xl {
     font-size: var(--text-3xl);
@@ -531,6 +543,13 @@
       }
     }
   }
+  .hover\:bg-secondary-200 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-secondary-200);
+      }
+    }
+  }
   .hover\:text-primary-700 {
     &:hover {
       @media (hover: hover) {
@@ -564,6 +583,11 @@
   .focus\:ring-primary-500 {
     &:focus {
       --tw-ring-color: var(--color-primary-500);
+    }
+  }
+  .focus\:ring-secondary-500 {
+    &:focus {
+      --tw-ring-color: var(--color-secondary-500);
     }
   }
   .focus\:ring-offset-2 {
