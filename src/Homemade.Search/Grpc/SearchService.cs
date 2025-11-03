@@ -46,7 +46,9 @@ public sealed class SearchService(
         var skip = Math.Max((request.Pagination?.Page ?? 0) * pageSize, 0);
         var take = skip + pageSize;
 
-        var query = _parser.Parse(request.SearchText);
+        var query = string.IsNullOrWhiteSpace(request.SearchText)
+            ? new MatchAllDocsQuery()
+            : _parser.Parse(request.SearchText);
         logger.LogInformation("Searching for {SearchText}", query);
 
         // Set up facet collector
