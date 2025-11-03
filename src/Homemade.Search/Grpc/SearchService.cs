@@ -1,9 +1,13 @@
+using Google.Protobuf.Collections;
+using Google.Protobuf.WellKnownTypes;
+
 using Grpc.Core;
 
 using Homemade.Database.Entities;
+using Homemade.Grpc;
+using Homemade.Grpc.Shared;
 
 using Lucene.Net.Analysis.Standard;
-using Lucene.Net.Documents.Extensions;
 using Lucene.Net.Facet;
 using Lucene.Net.Facet.Taxonomy;
 using Lucene.Net.QueryParsers.Classic;
@@ -13,6 +17,8 @@ using Lucene.Net.Util;
 using Lucent.Configuration;
 
 using Microsoft.Extensions.Options;
+
+using RecipeDifficulty = Homemade.Grpc.RecipeDifficulty;
 
 namespace Homemade.Search.Grpc;
 
@@ -26,6 +32,7 @@ public sealed class SearchService(
     [FromKeyedServices(nameof(Recipe))] TaxonomyReader taxonomyReader
 ) : RecipeSearch.RecipeSearchBase
 {
+    private readonly FacetsCollector _collector = new();
     private static readonly QueryParser _parser = new(
         LuceneVersion.LUCENE_48,
         nameof(Recipe.Name),
@@ -33,89 +40,77 @@ public sealed class SearchService(
     );
 
     /// <inheritdoc />
-    public override async Task Search(
-        SearchQuery request,
-        IServerStreamWriter<SearchResult> stream,
-        ServerCallContext context
-    )
+    public override Task<RecipeResults> Search(RecipeQuery request, ServerCallContext context)
     {
-        var pageSize = Math.Max(request.PageSize, 1);
-        var skip = Math.Max(request.Page * pageSize, 0);
+        var pageSize = Math.Max(request.Pagination?.PageSize ?? 0, 1);
+        var skip = Math.Max((request.Pagination?.Page ?? 0) * pageSize, 0);
         var take = skip + pageSize;
 
         var query = _parser.Parse(request.SearchText);
         logger.LogInformation("Searching for {SearchText}", query);
 
         // Set up facet collector
-        var facetsCollector = new FacetsCollector();
-        var topDocs = FacetsCollector.Search(searcher, query, take, facetsCollector);
+        var topDocs = FacetsCollector.Search(searcher, query, take, _collector);
 
         // Get facet results
         var facets = new FastTaxonomyFacetCounts(
             taxonomyReader,
             configuration.Get(nameof(Recipe)).FacetsConfig,
-            facetsCollector
+            _collector
         );
         var tagsFacets = facets.GetTopChildren(take, nameof(Recipe.Tags));
         var ingredientsFacets = facets.GetTopChildren(take, nameof(RecipeIngredient.Ingredient));
 
-        var pageCount = (uint)Math.Ceiling((double)topDocs.TotalHits / pageSize);
+        var pageCount = (int)Math.Ceiling((double)topDocs.TotalHits / pageSize);
 
-        // Stream results with facets in the first result
-        var isFirstResult = true;
-        foreach (var scoreDoc in topDocs.ScoreDocs.Skip(skip).Take(pageSize))
+        var result = new RecipeResults
+        {
+            Pagination = new Pagination { Count = topDocs.TotalHits, PageCount = pageCount, PageSize = pageSize, },
+        };
+
+        result.Tags.AddRange(tagsFacets?.LabelValues.Select(facet => new FacetValue
+        {
+            Name = facet.Label,
+            Count = (int)facet.Value
+        }) ?? []);
+
+        result.Ingredients.AddRange(ingredientsFacets?.LabelValues.Select(facet => new FacetValue
+        {
+            Name = facet.Label,
+            Count = (int)facet.Value
+        }) ?? []);
+
+        foreach (var scoreDoc in topDocs.ScoreDocs)
         {
             var document = searcher.Doc(scoreDoc.Doc);
-
-            var response = new SearchResult
+            var recipe = new RecipeResult
             {
-                Count = topDocs.TotalHits,
-                PageCount = pageCount,
-                PageSize = (uint)pageSize,
-                RecipeId = document.GetField(nameof(Recipe.Id)).GetInt64ValueOrDefault(),
-                RecipeName = document.Get(nameof(Recipe.Name)),
-                RecipeIcon = document.Get(nameof(Recipe.Icon)),
-                Tags = { },
-                TotalTimeMinutes = 0,
-                Servings = document.GetField(nameof(Recipe.Servings)).GetInt32ValueOrDefault(),
-                Difficulty = RecipeDifficulty.Easy,
-                IngredientCount = 0
+                Id = document.GetField(nameof(Recipe.Id)).GetInt64Value() ?? -1,
+                Name = document.GetField(nameof(Recipe.Name)).GetStringValue(),
+                Icon = document.GetField(nameof(Recipe.Icon)).GetStringValue(),
+                TotalTimeMinutes = new Duration(),
+                Servings = document.GetField(nameof(Recipe.Servings)).GetInt32Value() ?? -1,
+                Difficulty = RecipeDifficulty.Unknown,
+                IngredientCount = -1,
             };
 
-            // Add facets only to the first result
-            if (isFirstResult)
-            {
-                var facetsData = new Facets();
+            foreach (var tag in document.GetValues(nameof(Recipe.Tags)))
+                recipe.Tags.Add(tag);
 
-                if (tagsFacets != null)
-                {
-                    foreach (var labelValue in tagsFacets.LabelValues)
-                    {
-                        facetsData.Tags.Add(new Facet
-                        {
-                            Value = labelValue.Label,
-                            Count = (int)labelValue.Value
-                        });
-                    }
-                }
+            result.Recipes.Add(recipe);
+        }
 
-                if (ingredientsFacets != null)
-                {
-                    foreach (var labelValue in ingredientsFacets.LabelValues)
-                    {
-                        facetsData.Ingredients.Add(new Facet
-                        {
-                            Value = labelValue.Label,
-                            Count = (int)labelValue.Value
-                        });
-                    }
-                }
+        return Task.FromResult(result);
+    }
 
-                response.Facets = facetsData;
-                isFirstResult = false;
-            }
+    /// <inheritdoc />
+    public override async Task LiveSearch(IAsyncStreamReader<RecipeQuery> requestStream, IServerStreamWriter<RecipeResults> responseStream, ServerCallContext context)
+    {
+        await foreach (var query in requestStream.ReadAllAsync(context.CancellationToken))
+        {
+            var result = await Search(query, context);
 
-            await stream.WriteAsync(response, context.CancellationToken);
+            await responseStream.WriteAsync(result, context.CancellationToken);
         }
     }
 }

@@ -1,99 +1,84 @@
 syntax = "proto3";
 import "google/protobuf/duration.proto";
+import "models.proto";
 
-option csharp_namespace = "Homemade.Search.Grpc";
+option csharp_namespace = "Homemade.Grpc";
 
 package search;
 
 // The recipe search service definition.
 service RecipeSearch {
 	// Searches for recipes matching the given criteria
-	rpc Search (SearchQuery) returns (stream SearchResult);
+	rpc Search (RecipeQuery) returns (RecipeResults);
+
+	// Allows streaming multiple queries over the same connection.
+	rpc LiveSearch (stream RecipeQuery) returns (stream RecipeResults);
 }
 
 // The request message containing the search query.
-message SearchQuery {
-	// The (maximum) amount results per page.
-	int32 pageSize = 1;
+message RecipeQuery {
+	optional PaginationRequest pagination = 1;
 
-	// The page to fetch (for pagination), defaults to the first page.
-	optional int32 page = 2;
 	// The text the user entered in the free-text search box (if any).
-	optional string searchText = 3;
+	optional string searchText = 2;
 
 	// A list of tags that the recipes should have.
-	repeated string Tags = 4;
+	repeated string Tags = 3;
 
 	// An optional difficulty to filter the recipes with.
-	optional int32 Difficulty = 5;
+	optional int32 Difficulty = 4;
 
 	// If set only shows recipes whose cooking time is longer than this.
-	optional google.protobuf.Duration MinCookingTime = 6;
+	optional google.protobuf.Duration MinCookingTime = 5;
 
 	// If set only shows recipes whose cooking time is less than this.
-	optional int32 MaxCookingTime = 7;
+	optional int32 MaxCookingTime = 6;
 }
 
 // The response message containing a single search result.
-message SearchResult {
-	// The total amount of results (not paged).
-	int32 count = 1;
+message RecipeResults {
+	// Contains pagination information about the response.
+	Pagination pagination = 1;
 
-	// The amount of pages (calculated from the pageSize).
-	uint32 pageCount = 2;
+	// The recipes matching the requested query.
+	repeated RecipeResult recipes = 2;
 
-	// The maximum amount of results in a single page.
-	uint32 pageSize = 3;
+	// The tags facets for the results.
+	repeated FacetValue tags = 3;
 
-	// The ID of the recipe, used for linking and fetching details.
-	int64 recipeId = 4;
+	// The ingredient facets for the results.
+	repeated FacetValue ingredients = 4;
+}
+
+// Represents a single recipe search result.
+message RecipeResult {
+	// The ID of the recipe, used for linking and fetching information.
+	int64 id = 1;
 
 	// The name of the recipe.
-	string recipeName = 5;
+	string name = 2;
 
-	// The emoji of the recipe (if any).
-	optional string recipeIcon = 6;
+	// The icon (if any) of the recipe.
+	optional string icon = 3;
 
-	// The tags associated with this recipe.
-	repeated string tags = 7;
+	// A list of the tags associated with this recipe.
+	repeated string tags = 4;
 
-	// The total time in minutes (preparation + cooking).
-	int32 total_time_minutes = 8;
+	// The total time it takes to prepare this recipe.
+	google.protobuf.Duration totalTimeMinutes = 5;
 
-	// The number of servings this recipe makes.
-	int32 servings = 9;
+	// The amount of people this recipe can serve.
+	int32 servings = 6;
 
-	// The difficulty level of this recipe.
-	RecipeDifficulty difficulty = 10;
+	// The difficulty of this recipe.
+	RecipeDifficulty difficulty = 7;
 
-	// The total number of ingredients in this recipe.
-	int32 ingredient_count = 11;
-
-	// Facet data (only populated in the first result of a stream).
-	optional Facets facets = 12;
+	// The amount of ingredients required for this recipe.
+	int32 ingredientCount = 8;
 }
 
-// Represents a single facet value with its count.
-message Facet {
-	// The facet value (e.g., "Vegetarian", "Chicken").
-	string value = 1;
-
-	// The number of recipes with this facet value.
-	int32 count = 2;
-}
-
-// Contains all facet data for search results.
-message Facets {
-	// Tag facets with their counts.
-	repeated Facet tags = 1;
-
-	// Ingredient facets with their counts.
-	repeated Facet ingredients = 2;
-}
-
-// Recipe difficulty levels.
+// How difficult the recipe is (relatively).
 enum RecipeDifficulty {
-	EASY = 0;
-	MEDIUM = 1;
-	HARD = 2;
+	// The difficulty of the recipe was unspecified or a value not recognised.
+	Unknown = 0;
 }

@@ -1,8 +1,8 @@
 ﻿@page "/"
 @using System.Text
 @using System.Text.Json
-@using Grpc.Core
-@using Homemade.Search.Grpc
+@using Homemade.Grpc
+@using Homemade.Grpc.Shared
 @inject RecipeSearch.RecipeSearchClient SearchClient
 
 <PageTitle>Home</PageTitle>
@@ -31,9 +31,9 @@
 <p>Last call: @_lastCall</p>
 <InputText @bind-Value="Query" />
 <button @onclick="OnClick">call</button>
-<p>Reply count: @_replies.Count</p>
+<p>Reply count: @_response?.Recipes?.Count</p>
 <ul>
-    @foreach (var reply in _replies)
+    @foreach (var reply in _response?.Recipes ?? [])
     {
         <li>
             <pre>@Encoding.UTF8.GetString(JsonSerializer.SerializeToUtf8Bytes(reply, new JsonSerializerOptions { WriteIndented = true }))</pre>
@@ -51,7 +51,7 @@
     private DateTime? _lastCall;
     private Exception? _exception;
     private string Query { get; set; } = string.Empty;
-    private List<SearchResult> _replies = [];
+    private RecipeResults? _response;
 
     public async Task OnClick()
     {
@@ -59,14 +59,17 @@
         {
             _exception = null;
             _lastCall = DateTime.Now;
-            _replies = await SearchClient.Search(new()
+            _response = null;
+            StateHasChanged();
+
+            _response = await SearchClient.SearchAsync(new RecipeQuery
+            {
+                SearchText = Query,
+                Pagination = new PaginationRequest
                 {
-                    SearchText = Query,
-                    PageSize = 10,
-                })
-                .ResponseStream
-                .ReadAllAsync()
-                .ToListAsync();
+                    PageSize = 10
+                }
+            });
         }
         catch (Exception exception)
         {

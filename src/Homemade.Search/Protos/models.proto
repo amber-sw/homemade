@@ -1,0 +1,33 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Homemade.Grpc.Shared";
+
+// Contains information for requesting paginated data.
+message PaginationRequest {
+	// The (maximum) amount results per page.
+	int32 pageSize = 1;
+
+	// The page to fetch (for pagination), defaults to the first page.
+	int32 page = 2;
+}
+
+// Pagination information about a collection response
+message Pagination {
+	// The total amount of results (not paged).
+	int32 count = 1;
+
+	// The amount of pages (calculated from the pageSize).
+	int32 pageCount = 2;
+
+	// The maximum amount of results in a single page.
+	int32 pageSize = 3;
+}
+
+// A facet value.
+message FacetValue {
+	// The label this facet value represents.
+	string name = 1;
+
+	// The amount of results for this facet.
+	int32 count = 2;
+}
