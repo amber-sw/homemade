@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "Homemade.AI.Grpc";
+
+package chat;
+
+service Chat {
+	// Sends a greeting
+	rpc SayHello (ChatRequest) returns (ChatResponse);
+}
+
+message ChatRequest {
+	string question = 1;
+}
+
+message ChatResponse {
+	string message = 1;
+}
