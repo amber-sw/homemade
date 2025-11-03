@@ -12,7 +12,7 @@ var keycloak = builder.AddKeycloak("keycloak")
     .WithBindMount("../../keycloak/themes", "/opt/keycloak/themes")
     .WithRealmImport("../../keycloak/realms");
 
-builder.AddOllama("ollama")
+var ai = builder.AddOllama("ollama")
     .WithDataVolume()
     .AddModel("gemma3:1b");
 
@@ -41,6 +41,9 @@ builder.AddProject<Homemade_Web>("web")
 
 builder.AddProject<Homemade_AI>("ai")
     .WithHttpHealthCheck("/health")
-    .WithReference(keycloak);
+    .WithReference(keycloak)
+    .WithReference(ai)
+    .WaitFor(ai)
+    .WithEnvironment("ConnectionStrings__ollama", ai);
 
 builder.Build().Run();

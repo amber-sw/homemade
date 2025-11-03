@@ -1,4 +1,5 @@
 using Homemade.AI.Services;
+using Homemade.AI.Tools;
 
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
@@ -13,6 +14,10 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
     });
 });
+
+builder.Services.AddMcpServer()
+    .WithHttpTransport()
+    .WithTools<EchoTool>();
 
 builder.Services.AddAuthentication()
     .AddKeycloakJwtBearer(
@@ -34,6 +39,8 @@ builder.Services.AddAuthentication()
 builder.Services.AddGrpc();
 
 var app = builder.Build();
+
+app.MapMcp("/mcp");
 
 // Configure the HTTP request pipeline.
 app.MapGrpcService<GreeterService>();
