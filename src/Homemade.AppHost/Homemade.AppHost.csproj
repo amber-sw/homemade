@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Homemade.AI\Homemade.AI.csproj" />
       <ProjectReference Include="..\Homemade.Migrations\Homemade.Migrations.csproj" />
       <ProjectReference Include="..\Homemade.Search\Homemade.Search.csproj" />
       <ProjectReference Include="..\Homemade.Web\Homemade.Web.csproj" />

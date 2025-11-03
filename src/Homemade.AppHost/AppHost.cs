@@ -39,4 +39,8 @@ builder.AddProject<Homemade_Web>("web")
     .WithReference(cache)
     .WithReference(search);
 
+builder.AddProject<Homemade_AI>("ai")
+    .WithHttpHealthCheck("/health")
+    .WithReference(keycloak);
+
 builder.Build().Run();

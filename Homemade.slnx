@@ -7,6 +7,7 @@
     <Project Path="src\Homemade.Database\Homemade.Database.csproj" />
     <Project Path="src\Homemade.Search.Client\Homemade.Search.Client.csproj" Type="Classic C#" />
   </Folder>
+  <Project Path="src\Homemade.AI\Homemade.AI.csproj" Type="Classic C#" />
   <Project Path="src\Homemade.Migrations\Homemade.Migrations.csproj" />
   <Project Path="src\Homemade.Search\Homemade.Search.csproj" Type="Classic C#" />
   <Project Path="src\Homemade.Web\Homemade.Web.csproj" />
