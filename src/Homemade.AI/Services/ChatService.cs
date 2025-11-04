@@ -2,6 +2,7 @@ using System.Text;
 
 using Grpc.Core;
 
+using Homemade.AI.Extensions;
 using Homemade.AI.Grpc;
 using Homemade.AI.Tools;
 
@@ -15,7 +16,7 @@ namespace Homemade.AI.Services;
 
 /// <summary>
 /// </summary>
-public sealed class ChatService(IChatClient client, McpClient mcp) : Chat.ChatBase
+public sealed class ChatService(IChatClient client) : Chat.ChatBase
 {
     /// <inheritdoc />
     public override async Task SuggestRecipes(
@@ -24,9 +25,12 @@ public sealed class ChatService(IChatClient client, McpClient mcp) : Chat.ChatBa
         ServerCallContext context
     )
     {
+        var mcp = await context.CreateMcpClient();
+        var tools = await mcp.ListToolsAsync(cancellationToken: context.CancellationToken);
+
         var options = new ChatOptions
         {
-            Tools = [.. await mcp.ListToolsAsync()]
+            Tools = [.. tools]
         };
         var messages = new List<ChatMessage>
         {
