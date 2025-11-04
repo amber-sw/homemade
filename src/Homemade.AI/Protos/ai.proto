@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+option csharp_namespace = "Homemade.AI.Grpc.Shared";
+
+// Represents the role of a message in a chat conversation.
+enum ChatRole {
+	// Invalid/unspecified role (proto3 requires 0 value).
+	CHAT_ROLE_UNSPECIFIED = 0;
+	// Instructs or sets the behavior of the system.
+	CHAT_ROLE_SYSTEM = 1;
+	// Provides user input for chat interactions.
+	CHAT_ROLE_USER = 2;
+	// Provides responses to system-instructed, user-prompted input.
+	CHAT_ROLE_ASSISTANT = 3;
+	// Provides additional information in response to tool use requests.
+	CHAT_ROLE_TOOL = 4;
+}
+
+// Represents the different types of content in AI messages.
+message MessageContent {
+	oneof content {
+		// Text content.
+		string text = 1;
+		// Function/tool call request from the AI.
+		FunctionCall call = 2;
+		// Function/tool result response.
+		FunctionResult result = 3;
+		// Binary data content (images, files, etc.).
+		Data data = 4;
+		// URI-based content reference.
+		UriContent uri = 5;
+	}
+}
+
+// Represents a function/tool call request
+message FunctionCall {
+	// The function call ID
+	string call_id = 1;
+	// The name of the function/tool to call
+	string name = 2;
+	// The arguments as JSON string (represents IDictionary<string, object?>)
+	string arguments_json = 3;
+	// Optional error message if mapping failed
+	optional string exception_message = 4;
+}
+
+// Represents the result of a function/tool call
+message FunctionResult {
+	// The ID of the function call this is a result for
+	string call_id = 1;
+	// The result as JSON string (can be any object)
+	string result_json = 2;
+	// Optional error message if the function call failed
+	optional string exception_message = 3;
+}
+
+// Represents binary data content
+message Data {
+	// The binary data
+	bytes data = 1;
+	// The media type (MIME type) of the content
+	string media_type = 2;
+	// Optional name associated with the data
+	optional string name = 3;
+}
+
+// Represents URI-based content
+message UriContent {
+	// The URI for the content
+	string uri = 1;
+	// Optional media type (MIME type) for the content
+	optional string media_type = 2;
+}

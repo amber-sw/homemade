@@ -22,6 +22,8 @@ builder.Services.AddMcpServer()
 builder.AddOllamaApiClient("ollama")
     .AddChatClient();
 
+builder.Services.AddSearchClient();
+
 builder.Services.AddAuthentication()
     .AddKeycloakJwtBearer(
         serviceName: "keycloak",

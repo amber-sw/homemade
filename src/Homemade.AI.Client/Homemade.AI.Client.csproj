@@ -8,6 +8,7 @@
 
 	<ItemGroup>
 		<Protobuf Include="..\Homemade.AI\Protos\chat.proto" GrpcServices="Client" Link="Protos\chat.proto"/>
+		<Protobuf Include="..\Homemade.AI\Protos\ai.proto" GrpcServices="None" Link="Protos\ai.proto"/>
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,18 +1,28 @@
 syntax = "proto3";
+import "ai.proto";
 
 option csharp_namespace = "Homemade.AI.Grpc";
 
 package chat;
 
+// Chat service for AI interactions
 service Chat {
-	// Sends a greeting
-	rpc SayHello (ChatRequest) returns (ChatResponse);
+	// Processes a chat message and returns a response
+	rpc SayHello (ChatRequest) returns (stream ChatResponse);
 }
 
+// Request message for chat interactions
 message ChatRequest {
+	// The user's question or message
 	string question = 1;
 }
 
+// Response message from the chat service
 message ChatResponse {
-	string message = 1;
+	// The role of the entity that created the response.
+	ChatRole role = 1;
+	// The assistant's text response
+	string message = 2;
+	// Optional list of content items in the response
+	repeated MessageContent contents = 3;
 }

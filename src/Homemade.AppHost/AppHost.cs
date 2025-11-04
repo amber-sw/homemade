@@ -12,7 +12,7 @@ var keycloak = builder.AddKeycloak("keycloak")
     .WithBindMount("../../keycloak/themes", "/opt/keycloak/themes")
     .WithRealmImport("../../keycloak/realms");
 
-var ai = builder.AddOllama("ollama")
+var ollama = builder.AddOllama("ollama")
     .WithDataVolume()
     .AddModel("qwen3");
 
@@ -33,17 +33,19 @@ var search = builder.AddProject<Homemade_Search>("search")
     .WithReference(database)
     .WaitForCompletion(migrations);
 
+builder.AddProject<Homemade_AI>("ai")
+    .WithHttpHealthCheck("/health")
+    .WithReference(keycloak)
+    .WithReference(ollama)
+    .WaitFor(ollama)
+    .WithReference(search)
+    .WaitFor(search)
+    .WithEnvironment("ConnectionStrings__ollama", ollama);
+
 builder.AddProject<Homemade_Web>("web")
     .WithHttpHealthCheck("/health")
     .WithReference(keycloak)
     .WithReference(cache)
     .WithReference(search);
-
-builder.AddProject<Homemade_AI>("ai")
-    .WithHttpHealthCheck("/health")
-    .WithReference(keycloak)
-    .WithReference(ai)
-    .WaitFor(ai)
-    .WithEnvironment("ConnectionStrings__ollama", ai);
 
 builder.Build().Run();
