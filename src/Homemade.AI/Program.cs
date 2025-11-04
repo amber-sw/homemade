@@ -2,6 +2,9 @@ using Homemade.AI.Services;
 using Homemade.AI.Tools;
 
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.AI;
+
+using ModelContextProtocol.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
@@ -17,10 +20,27 @@ builder.WebHost.ConfigureKestrel(options =>
 
 builder.Services.AddMcpServer()
     .WithHttpTransport()
-    .WithTools<EchoTool>();
+    .WithTools<RecipesTool>();
 
 builder.AddOllamaApiClient("ollama")
-    .AddChatClient();
+    .AddChatClient()
+    .UseFunctionInvocation();
+
+// Add MCP client to connect to the local MCP server
+builder.Services.AddSingleton<McpClient>(serviceProvider =>
+{
+    var baseUrl = builder.Configuration["ASPNETCORE_URLS"]?.Split(';')[0] ?? "http://localhost:5000";
+    var mcpEndpoint = new Uri($"{baseUrl}/mcp");
+
+    var transport = new HttpClientTransport(
+        new HttpClientTransportOptions
+        {
+            Endpoint = mcpEndpoint
+        }
+    );
+
+    return McpClient.CreateAsync(transport).GetAwaiter().GetResult();
+});
 
 builder.Services.AddSearchClient();
 

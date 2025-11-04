@@ -8,7 +8,7 @@ package chat;
 // Chat service for AI interactions
 service Chat {
 	// Processes a chat message and returns a response
-	rpc SayHello (ChatRequest) returns (stream ChatResponse);
+	rpc SuggestRecipes (ChatRequest) returns (stream ChatResponse);
 }
 
 // Request message for chat interactions
