@@ -4,6 +4,7 @@
     <Project Path="src\Homemade.ServiceDefaults\Homemade.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/Libraries/">
+    <Project Path="src\Homemade.AI.Client\Homemade.AI.Client.csproj" Type="Classic C#" />
     <Project Path="src\Homemade.Database\Homemade.Database.csproj" />
     <Project Path="src\Homemade.Search.Client\Homemade.Search.Client.csproj" Type="Classic C#" />
   </Folder>
