@@ -14,7 +14,7 @@ var keycloak = builder.AddKeycloak("keycloak")
 
 var ai = builder.AddOllama("ollama")
     .WithDataVolume()
-    .AddModel("gemma3:1b");
+    .AddModel("qwen3");
 
 var cache = builder.AddGarnet("cache");
 
